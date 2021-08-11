@@ -4,9 +4,13 @@
 
 from setuptools import setup, find_packages
 
-requirements = [ ]
+requirements = [
+    "docopt",
+]
 
-test_requirements = [ ]
+test_requirements = [
+
+]
 
 setup(
     author="Leo Saffin",
