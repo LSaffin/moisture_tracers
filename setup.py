@@ -6,6 +6,9 @@ from setuptools import setup, find_packages
 
 requirements = [
     "docopt",
+    "tqdm",
+    "parse",
+    "Pillow",
 ]
 
 test_requirements = [
