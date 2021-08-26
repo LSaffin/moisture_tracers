@@ -10,7 +10,7 @@ import datetime
 from irise.forecast import Forecast
 
 
-def grey_zone_forecast(path, start_time, lead_times=range(1, 48+1)):
+def grey_zone_forecast(path, start_time, lead_times=range(24, 48+1)):
     """Return an irise.forecast.Forecast for an individual grey-zone simulation
 
     Args:
@@ -26,8 +26,8 @@ def grey_zone_forecast(path, start_time, lead_times=range(1, 48+1)):
 
     mapping = {
         start_time + datetime.timedelta(hours=dt): [
-            path + "model-variables_{}_T+{}".format(start_time_str, dt-1),
-            path + "moisture_tracers_{}_T+{}".format(start_time_str, dt-1)
+            path + "model-variables_{}_T+{:02d}.nc".format(start_time_str, dt-1),
+            path + "moisture-tracers_{}_T+{:02d}.nc".format(start_time_str, dt-1)
         ] for dt in lead_times
     }
 
