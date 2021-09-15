@@ -18,12 +18,13 @@ def identify_possibles(forecast):
         plt.figure(figsize=(8, 5))
         evaporation_tracer = cubes.extract_cube("microphysics_evaporation_q")[0]
         contours = get_cold_pool_contours(evaporation_tracer)
+        contours = filter_invalid(contours)
         plot.pcolormesh(evaporation_tracer, vmin=0, vmax=1e-3, cmap="Blues")
 
         for m, contour in enumerate(contours):
             # Resulting contour is 180 off the actual data coordinates. No idea why
-            plt.plot(contour[:, 0] - 180, contour[:, 1], color=colours[m])
-            plt.text(contour[0, 0] - 180, contour[0, 1], str(m), color=colours[m])
+            plt.plot(contour[:, 0] - 180, contour[:, 1], color=colours[m % len(colours)])
+            plt.text(contour[0, 0] - 180, contour[0, 1], str(m), color=colours[m % len(colours)])
 
         plt.savefig("cold_pools_T+{:02d}.png".format(n))
         plt.close()
@@ -45,7 +46,7 @@ def filter_invalid(contours):
 
     """
     # Sort contours by distance
-    contours = sorted(contours, key=contour_length)
+    contours = sorted([contour for contour in contours if len(contour) > 2], key=contour_length)
     polygons = [Polygon(contour) for contour in contours]
 
     # Check whether the shorter contours are contained by the longer contours
@@ -82,7 +83,7 @@ def contour_length(points):
     return conlen
 
 
-def is_closed_contour(contour_section, threshold=100):
+def is_closed_contour(contour_section, threshold=0.1):
     """Checks that a contour is closed
 
     Checks that the final point along a contour is sufficiently close to the
