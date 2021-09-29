@@ -17,7 +17,10 @@ Options:
 import datetime
 import docopt
 
+import numpy as np
+
 import iris
+from iris.coords import DimCoord
 
 from . import grey_zone_forecast
 
@@ -64,6 +67,40 @@ def generate_common_grid(high_res_cube, low_res_cube):
     ))
 
     return common_grid_cube
+
+
+def generate_1km_grid(cube_500m):
+    """Generate a 1km grid from the 500m-resolution forecast
+    """
+    # Need to recreate the coordinates as just subsetting the cube keeps the old
+    # coordinate bounds which then don't allow area-weighted regridding because they
+    # are not contiguous
+    lon = cube_500m.coord("grid_longitude")
+    lon = DimCoord(
+        lon.points[::2],
+        standard_name=lon.standard_name,
+        units=lon.units,
+        attributes=lon.attributes,
+        coord_system=lon.coord_system,
+        circular=lon.circular,
+    )
+    lat = cube_500m.coord("grid_latitude")
+    lat = DimCoord(
+        lat.points[::2],
+        standard_name=lat.standard_name,
+        units=lat.units,
+        attributes=lat.attributes,
+        coord_system=lat.coord_system,
+        circular=lat.circular,
+    )
+
+    lon.guess_bounds()
+    lat.guess_bounds()
+
+    cube_1km_grid = iris.cube.Cube(data=np.zeros([len(lat.points), len(lon.points)]),
+                                   dim_coords_and_dims=[(lat, 0), (lon, 1)])
+
+    return cube_1km_grid
 
 
 if __name__ == '__main__':
