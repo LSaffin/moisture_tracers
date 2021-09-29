@@ -1,13 +1,16 @@
 """
 
 Usage:
-    quicklook.py <path> <year> <month> <day>
+    quicklook.py <path> <year> <month> <day> [<resolution>] [<grid>]
+    quicklook.py (-h | --help)
 
 Arguments:
     <path>
     <year>
     <month>
     <day>
+    <resolution>
+    <grid>
 
 Options:
     -h --help
@@ -15,10 +18,10 @@ Options:
 """
 import datetime
 
-import docopt
 import matplotlib.pyplot as plt
 
 from twinotter.external import eurec4a
+from twinotter.util.scripting import parse_docopt_arguments
 import irise
 from irise import plot
 
@@ -28,16 +31,17 @@ from . import grey_zone_forecast
 zlevs = ("altitude", [50, 300, 500, 1000, 1500, 2000, 3000, 4000])
 
 
-def main():
-    args = docopt.docopt(__doc__)
+def main(path, year, month, day, resolution=None, grid=None):
 
     start_time = datetime.datetime(
-        year=int(args["<year>"]),
-        month=int(args["<month>"]),
-        day=int(args["<day>"]),
+        year=int(year),
+        month=int(month),
+        day=int(day),
     )
-    forecast = grey_zone_forecast(args["<path>"], start_time=start_time)
-    generate(forecast)
+    forecast = grey_zone_forecast(
+        path, start_time=start_time, resolution=resolution, grid=grid
+    )
+    generate(forecast, )
 
 
 def generate(forecast):
@@ -94,6 +98,7 @@ def make_plots(cubes, lead_time):
 
         ("upward_air_velocity", zlevs, plot.pcolormesh, [], dict(vmin=-2, vmax=2, cmap="Spectral")),
         ("air_potential_temperature", zlevs, plot.pcolormesh, [], dict(cmap="inferno")),
+        ("equivalent_potential_temperature", zlevs, plot.pcolormesh, [], dict(cmap="inferno")),
         ("specific_humidity", zlevs, plot.pcolormesh, [], dict(vmin=0, vmax=0.02, cmap="Spectral")),
         ("advection_only_q", zlevs, plot.pcolormesh, [], dict(vmin=0, vmax=0.02, cmap="seismic_r")),
         ("total_minus_advection_only_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.01, vmax=0.01, cmap="seismic_r")),
@@ -142,4 +147,4 @@ def make_plots(cubes, lead_time):
 
 
 if __name__ == '__main__':
-    main()
+    parse_docopt_arguments(main, __doc__)
