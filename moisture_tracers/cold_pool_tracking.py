@@ -10,6 +10,20 @@ from irise import plot
 colours = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
 
+def cold_pool_mask(dq_evap):
+    # 2d mask of cold pool based on surface evaporations
+    mask_cold_pool_2d = dq_evap[0].data > 1e-4
+
+    # Expand mask to all levels (3d)
+    nz, ny, nx = dq_evap.shape
+    mask_cold_pool = np.zeros([nz, ny, nx])
+
+    for k in range(nz):
+        mask_cold_pool[k, :, :] = mask_cold_pool_2d
+
+    return mask_cold_pool
+
+
 def identify_possibles(forecast):
     """Plot and label cold-pool contours at each timestep
     """
@@ -123,6 +137,4 @@ def haversine(x1, x2):
 if __name__ == "__main__":
     import datetime
     from . import grey_zone_forecast
-    forecast = grey_zone_forecast("", datetime.datetime(2020, 2, 1))
-    identify_possibles(forecast)
-
+    identify_possibles(grey_zone_forecast("", datetime.datetime(2020, 2, 1)))
