@@ -69,24 +69,33 @@ def generate_common_grid(high_res_cube, low_res_cube):
     return common_grid_cube
 
 
-def generate_1km_grid(cube_500m):
+def generate_1km_grid(cube_500m, coarse_factor=2):
     """Generate a 1km grid from the 500m-resolution forecast
     """
     # Need to recreate the coordinates as just subsetting the cube keeps the old
     # coordinate bounds which then don't allow area-weighted regridding because they
     # are not contiguous
+    # Extract coordinates
     lon = cube_500m.coord("grid_longitude")
+    lat = cube_500m.coord("grid_latitude")
+
+    # Get the average coordinate of every n points, where n is the coarse graining
+    # factor
+    # Chop off where the domain doesn't divide into the coarse factor
+    lon_points = chop_coord(lon.points, coarse_factor)
+    lat_points = chop_coord(lat.points, coarse_factor)
+
     lon = DimCoord(
-        lon.points[::2],
+        lon_points,
         standard_name=lon.standard_name,
         units=lon.units,
         attributes=lon.attributes,
         coord_system=lon.coord_system,
         circular=lon.circular,
     )
-    lat = cube_500m.coord("grid_latitude")
+
     lat = DimCoord(
-        lat.points[::2],
+        lat_points,
         standard_name=lat.standard_name,
         units=lat.units,
         attributes=lat.attributes,
@@ -101,6 +110,16 @@ def generate_1km_grid(cube_500m):
                                    dim_coords_and_dims=[(lat, 0), (lon, 1)])
 
     return cube_1km_grid
+
+
+def chop_coord(points, coarse_factor):
+    offset = (len(points) % coarse_factor)
+    if offset > 0:
+        lon_points = points[:-offset]
+    else:
+        lon_points = points
+
+    return np.mean(lon_points.reshape(-1, coarse_factor), axis=1)
 
 
 if __name__ == '__main__':
