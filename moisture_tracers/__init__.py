@@ -7,8 +7,11 @@ __version__ = '0.1.0'
 
 import datetime
 
+from dateutil.parser import  parse as dateparse
+
 from irise.forecast import Forecast
 
+from myscripts.projects.eurec4a.moisture_tracers import datadir, plotdir
 
 # Filename Patterns
 # model-variables_YYYYMMDDTHHMM_T+HH.nc and
@@ -20,19 +23,21 @@ regridded_filename = "{start_time}_{resolution}_T+{lead_time:02d}_{grid}.nc"
 
 
 def grey_zone_forecast(
-        path,
-        start_time,
+        path=datadir + "regridded/",
+        start_time=dateparse("2020-02-01"),
         resolution="km4p4",
         lead_times=range(24, 48+1),
-        grid=None,
+        grid="coarse_grid",
 ):
     """Return an irise.forecast.Forecast for an individual grey-zone simulation
 
     Args:
         path (str):
         start_time (datetime.datetime):
+        resolution (str):
         lead_times (iterable): Sequence of lead times (in hours) in the requested
             simulation. Default is every hour from 1 to 48
+        grid (str):
 
     Returns:
         irise.forecast.Forecast:
