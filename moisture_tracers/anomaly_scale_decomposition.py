@@ -58,13 +58,13 @@ def decompose_scales(cube, coarse_factor=4):
     # i.e. chop off ends that aren't divisible by coarse-graining factor
     pass
     # Regrid to the full grid
-    cube_mesoscale = cube_mesoscale.regrid(cube, Nearest())
+    cube_mesoscale_full_grid = cube_mesoscale.regrid(cube, Nearest())
     # Subtract mean to get mesoscale anomalies
     cube_mesoscale = cube_mesoscale - cube_mean
 
     # Small-scale anomalies
     # Remaining anomlies not accounted for by mesoscale
-    cube_small_scale = cube - (cube_mean + cube_mesoscale)
+    cube_small_scale = cube - (cube_mean + cube_mesoscale_full_grid)
 
     return cube_mean, cube_mesoscale, cube_small_scale
 
