@@ -2,7 +2,7 @@
 Plot maps of the moisture tracer budget on all vertical levels
 
 Usage:
-    check_budget.py <filename>
+    check_budget.py <filename> <budget>
     check_budget.py (-h | --help)
 
 Arguments:
@@ -12,7 +12,11 @@ Options:
         Show help
 """
 
+from math import ceil
+
 from tqdm import tqdm
+import numpy as np
+import iris
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 
@@ -22,28 +26,32 @@ from twinotter.util.scripting import parse_docopt_arguments
 
 from myscripts import plotdir
 
+budgets = dict(
+    total_minus_advection_only_q=[
+        "microphysics_q",
+        "boundary_layer_q",
+        "perturbations_q",
+        "leonard_terms_q",
+    ],
+    microphysics_q=[
+        "microphysics_cloud_q",
+        "rainfall_evaporation_q",
+    ]
+)
 
-def main(filename):
+
+def main(filename, budget):
     tracers = irise.load(filename)
+
+    for cube in tracers:
+        print(cube.name(), cube.data.min(), cube.data.max())
 
     for k in tqdm(range(40)):
         check_budget(
-            tracers,
-            "total_minus_advection_only_q",
-            ["microphysics_q",
-             "boundary_layer_q",
-             "theta_perturbations_q",
-             "leonard_terms_q",
-             "advection_correction_q",
-             "solver_q",
-             ],
-            ncols=3,
-            k=k,
-            vmin=-1e-2,
-            vmax=1e-2,
-            cmap="seismic_r"
+            tracers, budget, budgets[budget],
+            ncols=2, k=k, vmin=-1e-3, vmax=1e-3, cmap="seismic_r"
         )
-        plt.savefig(plotdir + "q_budget_k{}.png".format(k))
+        plt.savefig(plotdir + "{}_budget_k{}.png".format(budget, k))
         plt.close()
 
 
@@ -61,8 +69,8 @@ def check_budget(cubes, full, subsets, ncols=4, k=0, **kwargs):
     Returns:
 
     """
-    nfigs = 2 + len(subsets)
-    nrows = (nfigs + 1) // ncols
+    nfigs = 3 + len(subsets)
+    nrows = ceil(nfigs / ncols)
 
     full = convert.calc(full, cubes)
     subsets = convert.calc(subsets, cubes)
@@ -94,6 +102,28 @@ def check_budget(cubes, full, subsets, ncols=4, k=0, **kwargs):
     plt.subplots_adjust(bottom=0.2)
     cax = plt.axes([0.1, 0.1, 0.8, 0.05])
     fig.colorbar(im, cax=cax, orientation="horizontal")
+
+
+def domain_mean_profile(tracers, budget):
+    z = tracers[0].coord("height_above_reference_ellipsoid")
+    weights = np.ones_like(tracers[0].data)
+
+    weights[:, -20:, :] = 0.0
+    weights[:, :20, :] = 0.0
+    weights[:, :, -20:] = 0.0
+    weights[:, :, :20] = 0.0
+
+    for name in [budget] + budgets[budget]:
+        cube = convert.calc(name, tracers)
+        to_plot = cube.collapsed(
+            ["grid_latitude", "grid_longitude"],
+            iris.analysis.MEAN,
+            weights=weights,
+        )
+        iplt.plot(to_plot, z, label=cube.name())
+
+    plt.legend()
+    plt.show()
 
 
 if __name__ == "__main__":
