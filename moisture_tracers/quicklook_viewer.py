@@ -174,8 +174,11 @@ class QuicklookViewer(ttk.Frame):
                 )
             )
 
-        self.image = ImageTk.PhotoImage(Image.open(filename))
-        self.figure.configure(image=self.image)
+        try:
+            self.image = ImageTk.PhotoImage(Image.open(filename))
+            self.figure.configure(image=self.image)
+        except FileNotFoundError as e:
+            print(e)
 
     def update_figure(self, *args):
         self.resolution_selector.set_menu(self.resolution.get(), *self.resolutions)
