@@ -2,8 +2,26 @@
 Calculation of the terms in the tendency of mesoscale aggregation from
 Narenpitak at al. (2021). The terms are derived from the equations of
 Bretherton and Blossey (2017)
+
+Usage:
+    aggregation_terms.py
+        <path> <start_time> <resolution> <data_grid>
+        [<coarse_factor>]
+    aggregation_terms.py (-h | --help)
+
+Arguments:
+    <path>
+    <start_time>
+    <resolution>
+    <data_grid>
+    <coarse_factor>
+
+Options:
+    -h --help
+        Show this screen.
 """
 
+from dateutil.parser import parse as dateparse
 import numpy as np
 import iris
 from iris.analysis import AreaWeighted, MEAN, SUM, PERCENTILE, Linear
@@ -15,18 +33,22 @@ import matplotlib.pyplot as plt
 
 from irise import calculus, convert, grid
 
+from twinotter.util.scripting import parse_docopt_arguments
+
 from moisture_tracers import grey_zone_forecast
 from moisture_tracers.quicklook import specific_fixes
 from moisture_tracers.anomaly_scale_decomposition import decompose_scales
 
 
-def main():
+def main(path, start_time, resolution, data_grid, coarse_factor=4):
     """
     Calculate the aggregation terms in each quartile of column moisture at each lead
     time in a forecast and save to a netCDF file
     """
-    coarse_factor = 4
-    forecast = grey_zone_forecast(resolution="km1p1")
+    coarse_factor = int(coarse_factor)
+
+    start_time = dateparse(start_time)
+    forecast = grey_zone_forecast(path=path, start_time=start_time, resolution=resolution, grid=data_grid)
 
     vars_by_quartile = iris.cube.CubeList()
     for lead_time in range(24, 48 + 1):
@@ -47,8 +69,10 @@ def main():
     vars_by_quartile.merge()
     iris.save(
         vars_by_quartile,
-        "aggregation_terms_by_quartile_20200201_km4p4_lagrangian_grid.nc".format(
-            lead_time
+        "aggregation_terms_by_quartile_{}_{}_{}.nc".format(
+            start_time.strftime("%Y%m%d"),
+            resolution,
+            data_grid,
         ),
     )
 
@@ -221,7 +245,7 @@ def precipitation_mass_flux():
 
 if __name__ == "__main__":
     import warnings
-
     warnings.filterwarnings("ignore")
-    main()
-    plot_timeseries()
+
+    parse_docopt_arguments(main, __doc__)
+    #plot_timeseries()
