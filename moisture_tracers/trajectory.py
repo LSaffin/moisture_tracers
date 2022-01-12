@@ -4,6 +4,7 @@ from dateutil.parser import parse as dateparse
 import numpy as np
 
 from pylagranto import caltra
+from pylagranto.datasets import MetUMStaggeredGrid
 
 from moisture_tracers import grey_zone_forecast, datadir
 
@@ -11,19 +12,24 @@ from moisture_tracers import grey_zone_forecast, datadir
 def main():
     start_time = dateparse("2020-02-01")
 
-    path = datadir + "regridded/"
-    resolution = "km1p1"
-    grid = "coarse_grid"
+    path = datadir + "grey-zone/km4p4/"
+    resolution = "km4p4"
+    grid = None
 
     x0 = 302.5
     y0 = 13.5
     z0 = 500
     levels = ("height_above_reference_ellipsoid", [z0])
 
-    forecast = grey_zone_forecast(path, start_time, resolution=resolution, grid=grid)
+    forecast = grey_zone_forecast(
+        path, start_time, resolution=resolution, grid=grid, lead_times=range(1, 48 + 1)
+    )
     trainp = np.array([[x0, y0, z0]])
 
-    traout = caltra.caltra(trainp, forecast._loader.files, fbflag=-1, levels=levels)
+    times = list(forecast._loader.files)
+    datasource = MetUMStaggeredGrid(forecast._loader.files, levels=levels)
+
+    traout = caltra.caltra(trainp, times, datasource, fbflag=-1)
 
     traout.save(
         "trajectories_{}_{}_{}m.pkl".format(
