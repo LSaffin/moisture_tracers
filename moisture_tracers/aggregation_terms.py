@@ -40,6 +40,8 @@ def main():
         qt_column = convert.calc("total_column_water", cubes)
         qt_column = qt_column.regrid(qt_meso, AreaWeighted())
         for cube in average_by_quartile(qt_column, [A, B_v, B_h, C]):
+            cube.remove_coord("grid_longitude")
+            cube.remove_coord("grid_latitude")
             vars_by_quartile.append(cube)
 
     vars_by_quartile.merge()
