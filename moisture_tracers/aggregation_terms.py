@@ -28,22 +28,27 @@ def main():
     coarse_factor = 4
     forecast = grey_zone_forecast(resolution="km1p1")
 
-    for lead_time in range(24, 48+1):
+    vars_by_quartile = iris.cube.CubeList()
+    for lead_time in range(24, 48 + 1):
         print(lead_time)
 
         cubes = forecast.set_lead_time(hours=lead_time)
         specific_fixes(cubes)
-        for cube in cubes:
-            del cube.attributes["history"]
 
         qt_meso, A, B_v, B_h, C = get_aggregation_terms(cubes, coarse_factor)
 
         qt_column = convert.calc("total_column_water", cubes)
         qt_column = qt_column.regrid(qt_meso, AreaWeighted())
-        vars_by_quartile = average_by_quartile(qt_column, [A, B_v, B_h, C])
-        iris.save(
-            vars_by_quartile, "aggregation_terms_by_quartile_t+{}.nc".format(lead_time)
-        )
+        for cube in average_by_quartile(qt_column, [A, B_v, B_h, C]):
+            vars_by_quartile.append(cube)
+
+    vars_by_quartile.merge()
+    iris.save(
+        vars_by_quartile,
+        "aggregation_terms_by_quartile_20200201_km4p4_lagrangian_grid.nc".format(
+            lead_time
+        ),
+    )
 
 
 def get_aggregation_terms(cubes, coarse_factor):
