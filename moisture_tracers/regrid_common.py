@@ -34,7 +34,10 @@ def main():
         day=int(args["<day>"]),
     )
     forecast = grey_zone_forecast(
-        args["<path>"], start_time=start_time, lead_times=range(1, 48+1)
+        args["<path>"],
+        start_time=start_time,
+        lead_times=range(1, 48 + 1),
+        grid=None,
     )
 
     target_cube = iris.load_cube(args["<target>"])
@@ -48,10 +51,13 @@ def main():
                 newcube = cube.regrid(target_cube, regridder)
                 newcubes.append(newcube)
 
-        iris.save(newcubes, "{}_T+{:02d}_common_grid.nc".format(
-            forecast.start_time.strftime("%Y%m%dT%H%M"),
-            int(forecast.lead_time.total_seconds() // 3600)),
-                  )
+        iris.save(
+            newcubes,
+            "{}_T+{:02d}_common_grid.nc".format(
+                forecast.start_time.strftime("%Y%m%dT%H%M"),
+                int(forecast.lead_time.total_seconds() // 3600),
+            ),
+        )
 
 
 def generate_common_grid(high_res_cube, low_res_cube):
@@ -61,17 +67,18 @@ def generate_common_grid(high_res_cube, low_res_cube):
     lon = high_res_cube.coord("grid_longitude").points
     lat = high_res_cube.coord("grid_latitude").points
 
-    common_grid_cube = low_res_cube.extract(iris.Constraint(
-        grid_longitude=lambda x: lon[0] < x < lon[-1],
-        grid_latitude=lambda x: lat[0] < x < lat[-1],
-    ))
+    common_grid_cube = low_res_cube.extract(
+        iris.Constraint(
+            grid_longitude=lambda x: lon[0] < x < lon[-1],
+            grid_latitude=lambda x: lat[0] < x < lat[-1],
+        )
+    )
 
     return common_grid_cube
 
 
 def generate_1km_grid(cube_500m, coarse_factor=2):
-    """Generate a 1km grid from the 500m-resolution forecast
-    """
+    """Generate a 1km grid from the 500m-resolution forecast"""
     # Need to recreate the coordinates as just subsetting the cube keeps the old
     # coordinate bounds which then don't allow area-weighted regridding because they
     # are not contiguous
@@ -106,14 +113,16 @@ def generate_1km_grid(cube_500m, coarse_factor=2):
     lon.guess_bounds()
     lat.guess_bounds()
 
-    cube_1km_grid = iris.cube.Cube(data=np.zeros([len(lat.points), len(lon.points)]),
-                                   dim_coords_and_dims=[(lat, 0), (lon, 1)])
+    cube_1km_grid = iris.cube.Cube(
+        data=np.zeros([len(lat.points), len(lon.points)]),
+        dim_coords_and_dims=[(lat, 0), (lon, 1)],
+    )
 
     return cube_1km_grid
 
 
 def chop_coord(points, coarse_factor):
-    offset = (len(points) % coarse_factor)
+    offset = len(points) % coarse_factor
     if offset > 0:
         lon_points = points[:-offset]
     else:
@@ -122,6 +131,5 @@ def chop_coord(points, coarse_factor):
     return np.mean(lon_points.reshape(-1, coarse_factor), axis=1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-
