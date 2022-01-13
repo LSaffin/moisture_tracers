@@ -1,20 +1,34 @@
+"""
+
+Usage:
+    trajectory.py <path> <start_time> <resolution> <grid>
+    trajectory.py (-h | --help)
+
+Arguments:
+    <path>
+    <start_time>
+    <resolution>
+    <grid>
+
+Options:
+    -h --help
+        Show this screen.
+"""
+
 import warnings
 
 from dateutil.parser import parse as dateparse
 import numpy as np
 
+from twinotter.util.scripting import parse_docopt_arguments
 from pylagranto import caltra
 from pylagranto.datasets import MetUMStaggeredGrid
 
-from moisture_tracers import grey_zone_forecast, datadir
+from moisture_tracers import grey_zone_forecast
 
 
-def main():
-    start_time = dateparse("2020-02-01")
-
-    path = datadir + "grey-zone/km4p4/"
-    resolution = "km4p4"
-    grid = None
+def main(path, start_time, resolution, grid):
+    start_time = dateparse(start_time)
 
     x0 = 302.5
     y0 = 13.5
@@ -29,7 +43,9 @@ def main():
     times = list(forecast._loader.files)
     datasource = MetUMStaggeredGrid(forecast._loader.files, levels=levels)
 
-    traout = caltra.caltra(trainp, times, datasource, fbflag=-1)
+    traout = caltra.caltra(
+        trainp, times, datasource, fbflag=-1, tracers=["x_wind", "y_wind"]
+    )
 
     traout.save(
         "trajectories_{}_{}_{}m.pkl".format(
@@ -40,4 +56,4 @@ def main():
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
-    main()
+    parse_docopt_arguments(main, __doc__)
