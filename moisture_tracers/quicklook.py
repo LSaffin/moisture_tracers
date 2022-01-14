@@ -1,14 +1,12 @@
 """
 
 Usage:
-    quicklook.py <path> <year> <month> <day> [<resolution>] [<grid>] [<output_path>]
+    quicklook.py <path> <start_time> [<resolution>] [<grid>] [<output_path>]
     quicklook.py (-h | --help)
 
 Arguments:
     <path>
-    <year>
-    <month>
-    <day>
+    <start_time>
     <resolution>
     <grid>
     <output_path>
@@ -19,7 +17,9 @@ Options:
 """
 import datetime
 
+from dateutil.parser import parse as dateparse
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 
 from twinotter.external import eurec4a
 from twinotter.util.scripting import parse_docopt_arguments
@@ -32,13 +32,9 @@ from . import grey_zone_forecast
 zlevs = ("altitude", [50, 300, 500, 1000, 1500, 2000, 3000, 4000])
 
 
-def main(path, year, month, day, resolution=None, grid=None, output_path="."):
+def main(path, start_time, resolution=None, grid=None, output_path="."):
 
-    start_time = datetime.datetime(
-        year=int(year),
-        month=int(month),
-        day=int(day),
-    )
+    start_time = dateparse(start_time)
     forecast = grey_zone_forecast(
         path, start_time=start_time, resolution=resolution, grid=grid
     )
@@ -85,41 +81,197 @@ def make_plots(cubes, lead_time, output_path="."):
     print(lead_time)
 
     for name, levels, function, args, kwargs in [
-        ("surface_air_pressure", None, plot.contour, [range(99500, 102000, 10)], dict(colors="k")),
-        ("atmosphere_boundary_layer_thickness", None, plot.pcolormesh, [], dict(vmin=0, vmax=1500, cmap="cividis")),
-        ("toa_outgoing_shortwave_flux", None, plot.pcolormesh, [], dict(vmin=0, vmax=2000, cmap="Greys_r")),
-        ("surface_downwelling_shortwave_flux_in_air", None, plot.pcolormesh, [], dict(vmin=0, vmax=1000, cmap="Greys")),
-        ("toa_outgoing_longwave_flux", None, plot.pcolormesh, [], dict(vmin=200, vmax=300, cmap="Greys")),
-        ("surface_downwelling_longwave_flux_in_air", None, plot.pcolormesh, [], dict(vmin=350, vmax=450, cmap="Greys_r")),
-        ("surface_upward_sensible_heat_flux", None, plot.pcolormesh, [], dict(vmin=0, vmax=100, cmap="cividis")),
-        ("surface_upward_latent_heat_flux", None, plot.pcolormesh, [], dict(vmin=0, vmax=300, cmap="cividis")),
-        ("COMBINED BOUNDARY LAYER TYPE", None, plot.pcolormesh, [], dict(vmin=-0.5, vmax=9.5, cmap="tab10")),
-        ("TOTAL COLUMN Q (WATER VAPOUR PATH)", None, plot.pcolormesh, [], dict(vmin=0, vmax=40, cmap="Blues")),
-        ("atmosphere_cloud_liquid_water_content", None, plot.pcolormesh, [], dict(vmin=0, vmax=1, cmap="Blues")),
-        ("stratiform_rainfall_amount", None, plot.pcolormesh, [], dict(vmin=0, cmap="Blues")),
-        ("stratiform_rainfall_flux", None, plot.pcolormesh, [], dict(vmin=0, cmap="Blues")),
-
-        ("upward_air_velocity", zlevs, plot.pcolormesh, [], dict(vmin=-2, vmax=2, cmap="Spectral")),
+        (
+            "surface_air_pressure",
+            None,
+            plot.contour,
+            [range(99500, 102000, 10)],
+            dict(colors="k"),
+        ),
+        (
+            "atmosphere_boundary_layer_thickness",
+            None,
+            plot.pcolormesh,
+            [],
+            dict(vmin=0, vmax=1500, cmap="cividis"),
+        ),
+        (
+            "toa_outgoing_shortwave_flux",
+            None,
+            plot.pcolormesh,
+            [],
+            dict(vmin=0, vmax=2000, cmap="Greys_r"),
+        ),
+        (
+            "surface_downwelling_shortwave_flux_in_air",
+            None,
+            plot.pcolormesh,
+            [],
+            dict(vmin=0, vmax=1000, cmap="Greys"),
+        ),
+        (
+            "toa_outgoing_longwave_flux",
+            None,
+            plot.pcolormesh,
+            [],
+            dict(vmin=200, vmax=300, cmap="Greys"),
+        ),
+        (
+            "surface_downwelling_longwave_flux_in_air",
+            None,
+            plot.pcolormesh,
+            [],
+            dict(vmin=350, vmax=450, cmap="Greys_r"),
+        ),
+        (
+            "surface_upward_sensible_heat_flux",
+            None,
+            plot.pcolormesh,
+            [],
+            dict(vmin=0, vmax=100, cmap="cividis"),
+        ),
+        (
+            "surface_upward_latent_heat_flux",
+            None,
+            plot.pcolormesh,
+            [],
+            dict(vmin=0, vmax=300, cmap="cividis"),
+        ),
+        (
+            "COMBINED BOUNDARY LAYER TYPE",
+            None,
+            plot.pcolormesh,
+            [],
+            dict(vmin=-0.5, vmax=9.5, cmap="tab10"),
+        ),
+        (
+            "TOTAL COLUMN Q (WATER VAPOUR PATH)",
+            None,
+            plot.pcolormesh,
+            [],
+            dict(vmin=0, vmax=40, cmap="Blues"),
+        ),
+        (
+            "atmosphere_cloud_liquid_water_content",
+            None,
+            plot.pcolormesh,
+            [],
+            dict(vmin=0, vmax=1, cmap="Blues"),
+        ),
+        (
+            "stratiform_rainfall_amount",
+            None,
+            plot.pcolormesh,
+            [],
+            dict(vmin=0, cmap="Blues"),
+        ),
+        (
+            "cloud_thickness",
+            None,
+            plot.pcolormesh,
+            [],
+            dict(vmin=500, vmax=3000, cmap="cubehelix_r"),
+        ),
+        (
+            "cloud_top_height",
+            None,
+            plot.pcolormesh,
+            [],
+            dict(vmin=500, vmax=3000, cmap="cubehelix_r"),
+        ),
+        (
+            "upward_air_velocity",
+            zlevs,
+            plot.pcolormesh,
+            [],
+            dict(vmin=-1, vmax=1, cmap="Spectral"),
+        ),
         ("air_potential_temperature", zlevs, plot.pcolormesh, [], dict(cmap="inferno")),
-        ("equivalent_potential_temperature", zlevs, plot.pcolormesh, [], dict(cmap="inferno")),
-        ("specific_humidity", zlevs, plot.pcolormesh, [], dict(vmin=0, vmax=0.02, cmap="cubehelix_r")),
+        (
+            "equivalent_potential_temperature",
+            zlevs,
+            plot.pcolormesh,
+            [],
+            dict(cmap="inferno"),
+        ),
+        (
+            "specific_humidity",
+            zlevs,
+            plot.pcolormesh,
+            [],
+            dict(vmin=0, vmax=0.02, cmap="cubehelix_r"),
+        ),
         ("relative_humidity", zlevs, plot.pcolormesh, [], dict(cmap="cubehelix_r")),
-        ("advection_only_q", zlevs, plot.pcolormesh, [], dict(vmin=0, vmax=0.02, cmap="cubehelix_r")),
-        ("total_minus_advection_only_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.01, vmax=0.01, cmap="seismic_r")),
-        ("microphysics_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.01, vmax=0.01, cmap="seismic_r")),
-        ("microphysics_settling_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.001, vmax=0.001, cmap="seismic_r")),
-        ("microphysics_fixes_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.0001, vmax=0.0001, cmap="seismic_r")),
-        #("microphysics_deposition_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.01, vmax=0.01, cmap="seismic_r")),
-        ("microphysics_evaporation_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.001, vmax=0.001, cmap="seismic_r")),
-        #("microphysics_melting_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.01, vmax=0.01, cmap="seismic_r")),
-        ("boundary_layer_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.01, vmax=0.01, cmap="seismic_r")),
-        ("boundary_layer_entrainment_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.01, vmax=0.01, cmap="seismic_r")),
-        ("boundary_layer_surface_fluxes_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.01, vmax=0.01, cmap="seismic_r")),
-        ("boundary_layer_other_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.01, vmax=0.01, cmap="seismic_r")),
-        ("theta_perturbations_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.01, vmax=0.01, cmap="seismic_r")),
-        ("leonard_terms_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.001, vmax=0.001, cmap="seismic_r")),
-        ("advection_correction_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.0001, vmax=0.0001, cmap="seismic_r")),
-        ("solver_q", zlevs, plot.pcolormesh, [], dict(vmin=-0.0001, vmax=0.0001, cmap="seismic_r")),
+        (
+            "RAIN MIXING RATIO (mr) AFTER TS",
+            zlevs,
+            plot.pcolormesh,
+            [],
+            dict(norm=colors.LogNorm(vmin=1e-10, vmax=1e-4), cmap="cubehelix_r"),
+        ),
+        (
+            "mass_fraction_of_cloud_liquid_water_in_air",
+            zlevs,
+            plot.pcolormesh,
+            [],
+            dict(norm=colors.LogNorm(vmin=1e-10, vmax=1e-4), cmap="cubehelix_r"),
+        ),
+        (
+            "advection_only_q",
+            zlevs,
+            plot.pcolormesh,
+            [],
+            dict(vmin=0, vmax=0.02, cmap="cubehelix_r"),
+        ),
+        (
+            "total_minus_advection_only_q",
+            zlevs,
+            plot.pcolormesh,
+            [],
+            dict(vmin=-0.01, vmax=0.01, cmap="seismic_r"),
+        ),
+        (
+            "microphysics_q",
+            zlevs,
+            plot.pcolormesh,
+            [],
+            dict(vmin=-0.01, vmax=0.01, cmap="seismic_r"),
+        ),
+        (
+            "microphysics_cloud_q",
+            zlevs,
+            plot.pcolormesh,
+            [],
+            dict(vmin=-0.01, vmax=0.01, cmap="seismic_r"),
+        ),
+        (
+            "boundary_layer_q",
+            zlevs,
+            plot.pcolormesh,
+            [],
+            dict(vmin=-0.01, vmax=0.01, cmap="seismic_r"),
+        ),
+        (
+            "boundary_layer_cloud_q",
+            zlevs,
+            plot.pcolormesh,
+            [],
+            dict(vmin=-0.01, vmax=0.01, cmap="seismic_r"),
+        ),
+        (
+            "cloud_q",
+            zlevs,
+            plot.pcolormesh,
+            [],
+            dict(vmin=-0.001, vmax=0.001, cmap="seismic_r"),
+        ),
+        (
+            "leonard_terms_q",
+            zlevs,
+            plot.pcolormesh,
+            [],
+            dict(vmin=-0.001, vmax=0.001, cmap="seismic_r"),
+        ),
     ]:
         print(name)
         cube = irise.convert.calc(name, cubes, levels=levels)
@@ -129,26 +281,32 @@ def make_plots(cubes, lead_time, output_path="."):
             function(cube, *args, **kwargs)
             eurec4a.add_halo_circle(ax=plt.gca())
 
-            fig.savefig(output_path + "/{}_T+{}.png".format(
-                name,
-                int(lead_time.total_seconds() // 3600),
-            ))
+            fig.savefig(
+                output_path
+                + "/{}_T+{}.png".format(
+                    name,
+                    int(lead_time.total_seconds() // 3600),
+                )
+            )
 
         else:
             for n in range(len(levels[1])):
                 function(cube[n], *args, **kwargs)
                 eurec4a.add_halo_circle(ax=plt.gca())
 
-                fig.savefig(output_path + "/{}_{}{}_T+{}.png".format(
-                    name,
-                    levels[0],
-                    levels[1][n],
-                    int(lead_time.total_seconds() // 3600),
-                ))
+                fig.savefig(
+                    output_path
+                    + "/{}_{}{}_T+{}.png".format(
+                        name,
+                        levels[0],
+                        levels[1][n],
+                        int(lead_time.total_seconds() // 3600),
+                    )
+                )
                 plt.clf()
 
         plt.close(fig)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parse_docopt_arguments(main, __doc__)
