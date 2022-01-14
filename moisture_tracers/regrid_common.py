@@ -1,46 +1,40 @@
 """Put all forecast data on a common grid
 
 Usage:
-    regrid_common.py <path> <year> <month> <day> <target>
+    regrid_common.py <path> <start_time> <target> [<output_path>]
 
 Arguments:
     <path>
-    <year>
-    <month>
-    <day>
+    <start_time>
     <target>
+    <output_path>
 
 Options:
     -h --help
         Show this screen.
 """
-import datetime
-import docopt
-
+from dateutil.parser import parse as dateparse
 import numpy as np
 
 import iris
 from iris.coords import DimCoord
 
+from twinotter.util.scripting import parse_docopt_arguments
+
 from . import grey_zone_forecast
 
 
-def main():
-    args = docopt.docopt(__doc__)
+def main(path, start_time, target, output_path="."):
+    start_time = dateparse(start_time)
 
-    start_time = datetime.datetime(
-        year=int(args["<year>"]),
-        month=int(args["<month>"]),
-        day=int(args["<day>"]),
-    )
     forecast = grey_zone_forecast(
-        args["<path>"],
+        path,
         start_time=start_time,
         lead_times=range(1, 48 + 1),
         grid=None,
     )
 
-    target_cube = iris.load_cube(args["<target>"])
+    target_cube = iris.load_cube(target)
 
     for cubes in forecast:
         print(forecast.lead_time)
@@ -53,8 +47,9 @@ def main():
 
         iris.save(
             newcubes,
-            "{}_T+{:02d}_common_grid.nc".format(
-                forecast.start_time.strftime("%Y%m%dT%H%M"),
+            "{}/{}_T+{:02d}_common_grid.nc".format(
+                output_path,
+                start_time.strftime("%Y%m%dT%H%M"),
                 int(forecast.lead_time.total_seconds() // 3600),
             ),
         )
@@ -132,4 +127,4 @@ def chop_coord(points, coarse_factor):
 
 
 if __name__ == "__main__":
-    main()
+    parse_docopt_arguments(main, __doc__)
