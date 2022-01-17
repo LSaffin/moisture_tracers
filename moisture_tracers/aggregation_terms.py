@@ -7,6 +7,7 @@ Usage:
     aggregation_terms.py
         <path> <start_time> <resolution> <data_grid>
         [<coarse_factor>]
+        [--output_path=<path>]
     aggregation_terms.py (-h | --help)
 
 Arguments:
@@ -34,13 +35,22 @@ import matplotlib.pyplot as plt
 from irise import calculus, convert, grid
 
 from twinotter.util.scripting import parse_docopt_arguments
+from pylagranto import trajectory
 
-from moisture_tracers import grey_zone_forecast
+from moisture_tracers import datadir, grey_zone_forecast
 from moisture_tracers.quicklook import specific_fixes
 from moisture_tracers.anomaly_scale_decomposition import decompose_scales
 
 
-def main(path, start_time, resolution, data_grid, coarse_factor=4):
+long_names = dict(
+    a="advection_of_mesoscale_variability",
+    b_v="vertical_cumulus_fluxes",
+    b_h="horizontal_cumulus_fluxes",
+    c="mesoscale_vertical_advection_of_background_moisture",
+)
+
+
+def main(path, start_time, resolution, data_grid, coarse_factor=4, output_path="."):
     """
     Calculate the aggregation terms in each quartile of column moisture at each lead
     time in a forecast and save to a netCDF file
@@ -50,6 +60,14 @@ def main(path, start_time, resolution, data_grid, coarse_factor=4):
     start_time = dateparse(start_time)
     forecast = grey_zone_forecast(path=path, start_time=start_time, resolution=resolution, grid=data_grid)
 
+    if data_grid == "lagrangian_grid":
+        tr = trajectory.load(
+            datadir + "trajectories/trajectories_{}_{}_500m.pkl".format(
+                start_time.strftime("%Y%m%d"),
+                resolution,
+            )
+        )[0]
+
     vars_by_quartile = iris.cube.CubeList()
     for lead_time in range(24, 48 + 1):
         print(lead_time)
@@ -57,24 +75,39 @@ def main(path, start_time, resolution, data_grid, coarse_factor=4):
         cubes = forecast.set_lead_time(hours=lead_time)
         specific_fixes(cubes)
 
+        if data_grid == "lagrangian_grid":
+            subtract_winds(cubes, tr)
+
         qt_meso, A, B_v, B_h, C = get_aggregation_terms(cubes, coarse_factor)
 
         qt_column = convert.calc("total_column_water", cubes)
         qt_column = qt_column.regrid(qt_meso, AreaWeighted())
-        for cube in average_by_quartile(qt_column, [A, B_v, B_h, C]):
+        for cube in average_by_quartile(qt_column, [A, B_v, B_h, C, qt_column]):
             cube.remove_coord("grid_longitude")
             cube.remove_coord("grid_latitude")
             vars_by_quartile.append(cube)
 
-    vars_by_quartile.merge()
+    vars_by_quartile = vars_by_quartile.merge()
     iris.save(
         vars_by_quartile,
-        "aggregation_terms_by_quartile_{}_{}_{}.nc".format(
+        "{}/aggregation_terms_by_quartile_{}_{}_{}.nc".format(
+            output_path,
             start_time.strftime("%Y%m%d"),
             resolution,
             data_grid,
         ),
     )
+
+
+def subtract_winds(cubes, tr):
+    u = cubes.extract_cube("x_wind")
+    v = cubes.extract_cube("y_wind")
+
+    time = grid.get_datetime(u)
+    t_index = tr.times.index(time)
+
+    u.data -= tr["x_wind"][t_index]
+    v.data -= tr["y_wind"][t_index] 
 
 
 def get_aggregation_terms(cubes, coarse_factor):
@@ -139,9 +172,14 @@ def average_by_quartile(qt_column, cubes):
         mask = broadcast_to_shape(mask, cubes[0].shape, [1, 2])
 
         for m, cube in enumerate(cubes):
-            by_quartile = cube.collapsed(
-                ["grid_longitude", "grid_latitude"], MEAN, weights=mask
-            )
+            if cube.ndim == 2:
+                by_quartile = cube.collapsed(
+                    ["grid_longitude", "grid_latitude"], MEAN, weights=mask[0]
+                )
+            else:
+                by_quartile = cube.collapsed(
+                    ["grid_longitude", "grid_latitude"], MEAN, weights=mask
+                )
             by_quartile.add_aux_coord(AuxCoord(points=n + 1, long_name="quartile"))
             vars_by_quartile.append(by_quartile)
 
