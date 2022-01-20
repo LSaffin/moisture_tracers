@@ -1,14 +1,13 @@
 """
 
 Usage:
-    trajectory.py <path> <start_time> <resolution> <grid>
+    trajectory.py <path> <start_time> <resolution>
     trajectory.py (-h | --help)
 
 Arguments:
     <path>
     <start_time>
     <resolution>
-    <grid>
 
 Options:
     -h --help
@@ -27,7 +26,7 @@ from pylagranto.datasets import MetUMStaggeredGrid
 from moisture_tracers import grey_zone_forecast
 
 
-def main(path, start_time, resolution, grid):
+def main(path, start_time, resolution):
     start_time = dateparse(start_time)
 
     x0 = 302.5
@@ -36,7 +35,7 @@ def main(path, start_time, resolution, grid):
     levels = ("height_above_reference_ellipsoid", [z0])
 
     forecast = grey_zone_forecast(
-        path, start_time, resolution=resolution, grid=grid, lead_times=range(1, 48 + 1)
+        path, start_time, resolution=resolution, grid=None, lead_times=range(1, 48 + 1)
     )
     trainp = np.array([[x0, y0, z0]])
 
