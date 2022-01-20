@@ -6,6 +6,7 @@ Usage:
 Arguments:
     <path>
     <start_time>
+    <resolution>
     <target>
     <output_path>
 
@@ -24,13 +25,14 @@ from twinotter.util.scripting import parse_docopt_arguments
 from . import grey_zone_forecast
 
 
-def main(path, start_time, target, output_path="."):
+def main(path, start_time, resolution, target, output_path="."):
     start_time = dateparse(start_time)
 
     forecast = grey_zone_forecast(
         path,
         start_time=start_time,
-        lead_times=range(1, 48 + 1),
+        resolution=resolution,
+        lead_times=range(48 + 1),
         grid=None,
     )
 
@@ -47,9 +49,10 @@ def main(path, start_time, target, output_path="."):
 
         iris.save(
             newcubes,
-            "{}/{}_T+{:02d}_common_grid.nc".format(
+            "{}/{}_{}_T+{:02d}_common_grid.nc".format(
                 output_path,
                 start_time.strftime("%Y%m%dT%H%M"),
+                resolution,
                 int(forecast.lead_time.total_seconds() // 3600),
             ),
         )
