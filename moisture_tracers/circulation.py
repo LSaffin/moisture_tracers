@@ -1,25 +1,24 @@
 """
 
 Usage:
-    circulation.py <path> <year> <month> <day> [<resolution>] [<grid>]
+    circulation.py <path> <start_time> <resolution> <grid> [<output_path>]
     circulation.py (-h | --help)
 
 Arguments:
     <path>
-    <year>
-    <month>
-    <day>
+    <start_time>
     <resolution>
     <grid>
+    <output_path>
 
 Options:
     -h --help
         Show this screen.
 """
-import datetime
 import pathlib
 
 import parse
+from dateutil.parser import parse as dateparse
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -33,18 +32,22 @@ from . import grey_zone_forecast
 a = 6378100
 
 
-def main(path, year, month, day, resolution, grid):
-    start_time = datetime.datetime(
-        year=int(year),
-        month=int(month),
-        day=int(day),
-    )
+def main(path, start_time, resolution, grid, output_path="./"):
+    start_time = dateparse(start_time)
     forecast = grey_zone_forecast(
         path, start_time=start_time, resolution=resolution, grid=grid
     )
     circulation = get_circulations(forecast, plevs=np.arange(100000, 70000, -5000))
 
-    np.save("circulation_{}.npy".format(resolution), np.array(circulation))
+    np.save(
+        "{}/circulation_{}_{}_{}.npy".format(
+            output_path,
+            start_time.strftime("%Y%m%d"),
+            resolution,
+            grid,
+        ),
+        np.array(circulation)
+    )
 
 
 def get_circulations(forecast, plevs):
@@ -102,4 +105,3 @@ def plot_all():
 
 if __name__ == '__main__':
     parse_docopt_arguments(main, __doc__)
-    plot_all()
