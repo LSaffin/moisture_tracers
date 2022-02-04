@@ -22,7 +22,6 @@ Options:
         Show this screen.
 """
 
-from dateutil.parser import parse as dateparse
 import numpy as np
 import iris
 from iris.analysis import AreaWeighted, MEAN, SUM, PERCENTILE, Linear
@@ -57,13 +56,14 @@ def main(path, start_time, resolution, data_grid, coarse_factor=4, output_path="
     """
     coarse_factor = int(coarse_factor)
 
-    start_time = dateparse(start_time)
-    forecast = grey_zone_forecast(path=path, start_time=start_time, resolution=resolution, grid=data_grid)
+    forecast = grey_zone_forecast(
+        path=path, start_time=start_time, resolution=resolution, grid=data_grid
+    )
 
     if data_grid == "lagrangian_grid":
         tr = trajectory.load(
             datadir + "trajectories/trajectories_{}_{}_500m.pkl".format(
-                start_time.strftime("%Y%m%d"),
+                forecast.start_time.strftime("%Y%m%d"),
                 resolution,
             )
         )[0]

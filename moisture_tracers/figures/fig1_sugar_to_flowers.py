@@ -4,8 +4,6 @@ Plot showing the transition in cloud organisation from the Feb 2 case study
 Show cloud images at two lead times for each resolution and compare with satellite
 """
 
-
-from dateutil.parser import parse as dateparse
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 
@@ -13,7 +11,7 @@ from moisture_tracers import grey_zone_forecast, datadir, plotdir
 
 
 def main():
-    start_time = dateparse("20200201")
+    start_time = "2020-02-01"
     path = datadir + "regridded/"
     grid = "coarse_grid"
 

@@ -16,7 +16,7 @@ Options:
     -h --help
         Show this screen.
 """
-from dateutil.parser import parse as dateparse
+
 import numpy as np
 import iris
 from iris.analysis import MEAN, RMS
@@ -28,7 +28,6 @@ from . import grey_zone_forecast
 
 
 def main(path, start_time, resolution, grid, output_path="./"):
-    start_time = dateparse(start_time)
     forecast = grey_zone_forecast(
         path, start_time=start_time, resolution=resolution, grid=grid
     )
@@ -39,7 +38,7 @@ def main(path, start_time, resolution, grid, output_path="./"):
         results,
         "{}/circle_averages_{}_{}_{}.nc".format(
             output_path,
-            start_time.strftime("%Y%m%d"),
+            forecast.start_time.strftime("%Y%m%d"),
             resolution,
             grid,
         ),

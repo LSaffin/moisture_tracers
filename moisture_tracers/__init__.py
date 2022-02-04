@@ -7,7 +7,7 @@ __version__ = '0.1.0'
 
 import datetime
 
-from dateutil.parser import  parse as dateparse
+from dateutil.parser import parse as dateparse
 
 from irise.forecast import Forecast
 
@@ -24,7 +24,7 @@ regridded_filename = "{start_time}_{resolution}_T+{lead_time:02d}_{grid}.nc"
 
 def grey_zone_forecast(
         path=datadir + "regridded/",
-        start_time=dateparse("2020-02-01"),
+        start_time="2020-02-01",
         resolution="km4p4",
         lead_times=range(24, 48+1),
         grid="coarse_grid",
@@ -33,15 +33,18 @@ def grey_zone_forecast(
 
     Args:
         path (str):
-        start_time (datetime.datetime):
+        start_time (datetime.datetime | str):
         resolution (str):
         lead_times (iterable): Sequence of lead times (in hours) in the requested
             simulation. Default is every hour from 1 to 48
-        grid (str):
+        grid (str | None):
 
     Returns:
         irise.forecast.Forecast:
     """
+    if isinstance(start_time, str):
+        start_time = dateparse(start_time)
+
     start_time_str = start_time.strftime("%Y%m%dT%H%M")
 
     if grid is None:

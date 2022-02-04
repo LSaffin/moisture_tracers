@@ -22,7 +22,6 @@ Options:
 """
 import warnings
 
-from dateutil.parser import parse as dateparse
 import numpy as np
 import iris
 from iris.cube import Cube
@@ -48,10 +47,9 @@ def main(
 
     tr = trajectory.load(trajectory_filename)
 
-    start_time = dateparse(forecast_start)
     forecast = grey_zone_forecast(
         forecast_path,
-        start_time=start_time,
+        start_time=forecast_start,
         resolution=forecast_resolution,
         lead_times=range(1, 48 + 1),
         grid=None,

@@ -15,8 +15,7 @@ Options:
     -h --help
         Show this screen.
 """
-import iris
-from dateutil.parser import parse as dateparse
+
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
@@ -32,8 +31,6 @@ zlevs = ("altitude", [50, 300, 500, 1000, 1500, 2000, 3000, 4000])
 
 
 def main(path, start_time, resolution=None, grid=None, output_path="."):
-
-    start_time = dateparse(start_time)
     forecast = grey_zone_forecast(
         path, start_time=start_time, resolution=resolution, grid=grid
     )

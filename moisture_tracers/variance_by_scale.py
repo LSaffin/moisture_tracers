@@ -1,6 +1,5 @@
 import warnings
 
-from dateutil.parser import parse as dateparse
 import numpy as np
 import iris
 from iris.coords import AuxCoord
@@ -19,7 +18,7 @@ resolutions = ["D100m_300m", "D100m_500m", "km1p1"]
 
 
 def main():
-    start_time = dateparse("2020-02-01")
+    start_time = "2020-02-01"
     path = datadir + "regridded/"
     grid = "coarse_grid"
 

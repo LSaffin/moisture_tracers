@@ -18,7 +18,6 @@ Options:
 import pathlib
 
 import parse
-from dateutil.parser import parse as dateparse
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -33,7 +32,6 @@ a = 6378100
 
 
 def main(path, start_time, resolution, grid, output_path="./"):
-    start_time = dateparse(start_time)
     forecast = grey_zone_forecast(
         path, start_time=start_time, resolution=resolution, grid=grid
     )
@@ -42,7 +40,7 @@ def main(path, start_time, resolution, grid, output_path="./"):
     np.save(
         "{}/circulation_{}_{}_{}.npy".format(
             output_path,
-            start_time.strftime("%Y%m%d"),
+            forecast.start_time.strftime("%Y%m%d"),
             resolution,
             grid,
         ),

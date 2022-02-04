@@ -16,7 +16,6 @@ Options:
 
 import warnings
 
-from dateutil.parser import parse as dateparse
 import numpy as np
 
 from twinotter.util.scripting import parse_docopt_arguments
@@ -27,8 +26,6 @@ from moisture_tracers import grey_zone_forecast
 
 
 def main(path, start_time, resolution):
-    start_time = dateparse(start_time)
-
     x0 = 302.5
     y0 = 13.5
     z0 = 500
@@ -48,7 +45,7 @@ def main(path, start_time, resolution):
 
     traout.save(
         "trajectories_{}_{}_{}m.pkl".format(
-            start_time.strftime("%Y%m%d"), resolution, z0
+            forecast.start_time.strftime("%Y%m%d"), resolution, z0
         )
     )
 

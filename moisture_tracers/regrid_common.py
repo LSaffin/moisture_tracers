@@ -14,7 +14,7 @@ Options:
     -h --help
         Show this screen.
 """
-from dateutil.parser import parse as dateparse
+
 import numpy as np
 
 import iris
@@ -26,8 +26,6 @@ from . import grey_zone_forecast
 
 
 def main(path, start_time, resolution, target, output_path="."):
-    start_time = dateparse(start_time)
-
     forecast = grey_zone_forecast(
         path,
         start_time=start_time,
@@ -51,7 +49,7 @@ def main(path, start_time, resolution, target, output_path="."):
             newcubes,
             "{}/{}_{}_T+{:02d}_common_grid.nc".format(
                 output_path,
-                start_time.strftime("%Y%m%dT%H%M"),
+                forecast.start_time.strftime("%Y%m%dT%H%M"),
                 resolution,
                 int(forecast.lead_time.total_seconds() // 3600),
             ),

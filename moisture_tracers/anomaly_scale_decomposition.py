@@ -1,6 +1,6 @@
 """
 """
-from dateutil.parser import parse as dateparse
+
 import matplotlib.pyplot as plt
 import iris.quickplot as qplt
 from iris.analysis import MEAN, AreaWeighted, Nearest
@@ -13,7 +13,7 @@ from moisture_tracers.regrid_common import generate_1km_grid
 
 
 def main():
-    start_time = dateparse("20200201")
+    start_time = "2020-02-01"
     path = datadir + "regridded/"
     grid = "coarse_grid"
     lead_time = 40
