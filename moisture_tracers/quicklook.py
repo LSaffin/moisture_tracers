@@ -15,8 +15,7 @@ Options:
     -h --help
         Show this screen.
 """
-import datetime
-
+import iris
 from dateutil.parser import parse as dateparse
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
@@ -273,37 +272,40 @@ def make_plots(cubes, lead_time, output_path="."):
             dict(vmin=-0.001, vmax=0.001, cmap="seismic_r"),
         ),
     ]:
-        print(name)
-        cube = irise.convert.calc(name, cubes, levels=levels)
+        try:
+            cube = irise.convert.calc(name, cubes, levels=levels)
+            print(name)
 
-        fig, axes = plt.subplots(figsize=(5, 8))
-        if levels is None:
-            function(cube, *args, **kwargs)
-            eurec4a.add_halo_circle(ax=plt.gca())
-
-            fig.savefig(
-                output_path
-                + "/{}_T+{}.png".format(
-                    name,
-                    int(lead_time.total_seconds() // 3600),
-                )
-            )
-
-        else:
-            for n in range(len(levels[1])):
-                function(cube[n], *args, **kwargs)
+            fig, axes = plt.subplots(figsize=(5, 8))
+            if levels is None:
+                function(cube, *args, **kwargs)
                 eurec4a.add_halo_circle(ax=plt.gca())
 
                 fig.savefig(
                     output_path
-                    + "/{}_{}{}_T+{}.png".format(
+                    + "/{}_T+{}.png".format(
                         name,
-                        levels[0],
-                        levels[1][n],
                         int(lead_time.total_seconds() // 3600),
                     )
                 )
-                plt.clf()
+
+            else:
+                for n in range(len(levels[1])):
+                    function(cube[n], *args, **kwargs)
+                    eurec4a.add_halo_circle(ax=plt.gca())
+
+                    fig.savefig(
+                        output_path
+                        + "/{}_{}{}_T+{}.png".format(
+                            name,
+                            levels[0],
+                            levels[1][n],
+                            int(lead_time.total_seconds() // 3600),
+                        )
+                    )
+                    plt.clf()
+        except ValueError:
+            print("{} not in cubelist at this time".format(name))
 
         plt.close(fig)
 
