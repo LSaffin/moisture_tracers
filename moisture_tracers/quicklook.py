@@ -134,14 +134,14 @@ def make_plots(cubes, lead_time, output_path="."):
             dict(vmin=0, vmax=300, cmap="cividis"),
         ),
         (
-            "COMBINED BOUNDARY LAYER TYPE",
+            "boundary_layer_type",
             None,
             plot.pcolormesh,
             [],
             dict(vmin=-0.5, vmax=9.5, cmap="tab10"),
         ),
         (
-            "TOTAL COLUMN Q (WATER VAPOUR PATH)",
+            "total_column_water",
             None,
             plot.pcolormesh,
             [],
@@ -199,7 +199,7 @@ def make_plots(cubes, lead_time, output_path="."):
         ),
         ("relative_humidity", zlevs, plot.pcolormesh, [], dict(cmap="cubehelix_r")),
         (
-            "RAIN MIXING RATIO (mr) AFTER TS",
+            "rain_mixing_ratio",
             zlevs,
             plot.pcolormesh,
             [],
