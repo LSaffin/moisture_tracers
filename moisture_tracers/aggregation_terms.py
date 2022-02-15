@@ -92,7 +92,7 @@ def main(path, start_time, resolution, data_grid, coarse_factor=4, output_path="
         vars_by_quartile,
         "{}/aggregation_terms_by_quartile_{}_{}_{}.nc".format(
             output_path,
-            start_time.strftime("%Y%m%d"),
+            forecast.start_time.strftime("%Y%m%d"),
             resolution,
             data_grid,
         ),
