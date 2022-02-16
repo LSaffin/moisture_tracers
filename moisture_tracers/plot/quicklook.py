@@ -24,7 +24,7 @@ from twinotter.util.scripting import parse_docopt_arguments
 import irise
 from irise import plot
 
-from moisture_tracers import grey_zone_forecast
+from moisture_tracers import grey_zone_forecast, specific_fixes
 
 
 zlevs = ("altitude", [50, 300, 500, 1000, 1500, 2000, 3000, 4000])
