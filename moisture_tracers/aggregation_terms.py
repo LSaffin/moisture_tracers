@@ -37,7 +37,7 @@ from twinotter.util.scripting import parse_docopt_arguments
 from pylagranto import trajectory
 
 from moisture_tracers import datadir, grey_zone_forecast
-from moisture_tracers.quicklook import specific_fixes
+from moisture_tracers import specific_fixes
 from moisture_tracers.anomaly_scale_decomposition import decompose_scales
 
 

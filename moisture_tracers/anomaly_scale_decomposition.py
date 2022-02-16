@@ -8,7 +8,7 @@ from iris.analysis import MEAN, AreaWeighted, Nearest
 from irise import convert
 
 from moisture_tracers import grey_zone_forecast, datadir
-from moisture_tracers.quicklook import specific_fixes
+from moisture_tracers import specific_fixes
 from moisture_tracers.regrid_common import generate_1km_grid
 
 

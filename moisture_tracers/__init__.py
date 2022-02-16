@@ -9,6 +9,7 @@ import datetime
 
 from dateutil.parser import parse as dateparse
 
+from irise.interpolate import remap_3d
 from irise.forecast import Forecast
 
 from myscripts.projects.eurec4a.moisture_tracers import datadir, plotdir
@@ -70,3 +71,24 @@ def grey_zone_forecast(
         }
 
     return Forecast(start_time, mapping)
+
+
+def specific_fixes(cubes):
+    # Regrid any cubes not defined on the same grid as air_pressure (theta-levels,
+    # centre of the C-grid). This should affect u, v, and density
+    # Rename "height_above_reference_ellipsoid" to "altitude" as a lot of my code
+    # currently assumes an altitude coordinate
+
+    regridded = []
+    example_cube = cubes.extract_cube("air_pressure")
+    z = example_cube.coord("atmosphere_hybrid_height_coordinate")
+    for cube in cubes:
+        if cube.ndim == 3:
+            cube.coord("height_above_reference_ellipsoid").rename("altitude")
+
+            if cube.coord("atmosphere_hybrid_height_coordinate") != z:
+                regridded.append(remap_3d(cube, example_cube))
+
+    for cube in regridded:
+        cubes.remove(cubes.extract_cube(cube.name()))
+        cubes.append(cube)
