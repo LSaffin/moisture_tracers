@@ -27,7 +27,7 @@ def grey_zone_forecast(
         path=datadir + "regridded/",
         start_time="2020-02-01",
         resolution="km4p4",
-        lead_times=range(24, 48+1),
+        lead_times=range(48+1),
         grid="coarse_grid",
 ):
     """Return an irise.forecast.Forecast for an individual grey-zone simulation
@@ -53,7 +53,7 @@ def grey_zone_forecast(
             start_time + datetime.timedelta(hours=dt): [
                 path + model_filename.format(
                     start_time=start_time_str,
-                    lead_time=dt-1
+                    lead_time=max(0, dt-1)
                 ),
             ] for dt in lead_times
         }
@@ -78,9 +78,11 @@ def specific_fixes(cubes):
     # centre of the C-grid). This should affect u, v, and density
     # Rename "height_above_reference_ellipsoid" to "altitude" as a lot of my code
     # currently assumes an altitude coordinate
+    if 3 not in [cube.ndim for cube in cubes]:
+        return
 
     regridded = []
-    example_cube = cubes.extract_cube("air_pressure")
+    example_cube = cubes.extract_cube("upward_air_velocity")
     z = example_cube.coord("atmosphere_hybrid_height_coordinate")
     for cube in cubes:
         if cube.ndim == 3:

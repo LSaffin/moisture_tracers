@@ -48,12 +48,12 @@ def generate(forecast, output_path="."):
     """
     for cubes in forecast:
         specific_fixes(cubes)
-
         make_plots(cubes, forecast.lead_time, output_path=output_path)
 
 
 def make_plots(cubes, lead_time, output_path="."):
     print(lead_time)
+    lead_time = str(int(lead_time.total_seconds() // 3600)).zfill(2)
 
     for name, levels, function, args, kwargs in [
         (
@@ -261,7 +261,7 @@ def make_plots(cubes, lead_time, output_path="."):
                     output_path
                     + "/{}_T+{}.png".format(
                         name,
-                        int(lead_time.total_seconds() // 3600),
+                        lead_time,
                     )
                 )
 
@@ -276,14 +276,15 @@ def make_plots(cubes, lead_time, output_path="."):
                             name,
                             levels[0],
                             levels[1][n],
-                            int(lead_time.total_seconds() // 3600),
+                            lead_time,
                         )
                     )
                     plt.clf()
-        except ValueError:
-            print("{} not in cubelist at this time".format(name))
 
-        plt.close(fig)
+            plt.close(fig)
+        except ValueError as e:
+            print(e)
+            print("{} not in cubelist at this time".format(name))
 
 
 if __name__ == "__main__":
