@@ -158,19 +158,19 @@ class QuicklookViewer(ttk.Frame):
             filename = str(
                 self.path
                 / self.resolution.get()
-                / "{name}_T+{lead_time}.png".format(
+                / "{name}_T+{lead_time:02d}.png".format(
                     name=self.variable.get(),
-                    lead_time=self.lead_time.get(),
+                    lead_time=int(self.lead_time.get()),
                 )
             )
         else:
             filename = str(
                 self.path
                 / self.resolution.get()
-                / "{name}_altitude{vertical_level}_T+{lead_time}.png".format(
+                / "{name}_altitude{vertical_level}_T+{lead_time:02d}.png".format(
                     name=self.variable.get(),
                     vertical_level=self.vertical_level.get(),
-                    lead_time=self.lead_time.get(),
+                    lead_time=int(self.lead_time.get()),
                 )
             )
 
