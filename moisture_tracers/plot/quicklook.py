@@ -116,7 +116,7 @@ def make_plots(cubes, lead_time, output_path="./", replace_existing=False):
             if len(levels_to_plot) > 0:
                 try:
                     cube = irise.convert.calc(name, cubes, levels=(levels[0], levels_to_plot))
-                    for n in range(levels_to_plot):
+                    for n in range(len(levels_to_plot)):
                         function(cube[n], *args, **kwargs)
                         eurec4a.add_halo_circle(ax=plt.gca())
                         plt.savefig(fnames[n])
