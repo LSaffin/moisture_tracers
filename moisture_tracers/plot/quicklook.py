@@ -65,6 +65,26 @@ diagnostics = dict(
 )
 
 
+def get_wind_shear(cubes):
+    u = irise.convert.calc("x_wind", cubes, levels=("air_pressure", [70000, 100000]))
+    v = irise.convert.calc("y_wind", cubes, levels=("air_pressure", [70000, 100000]))
+
+    du_dz = u[1] - u[0]
+    dv_dz = v[1] - v[0]
+
+    return (du_dz**2 + dv_dz**2)**0.5
+
+
+def get_lts(cubes):
+    theta = irise.convert.calc("air_potential_temperature", cubes, levels=("air_pressure", [70000, 100000]))
+
+    return theta[1] - theta[0]
+
+
+diagnostics["wind_shear"] = [get_wind_shear, plot.pcolormesh, [], dict(vmin=0, vmax=10, cmap="cubehelix_r")]
+diagnostics["lower_tropospheric_stability"] = [get_lts, plot.pcolormesh, [], dict(vmin=-30, vmax=-15, cmap="cubehelix")]
+
+
 def main(path, start_time, resolution=None, grid=None, output_path="./", replace_existing=False):
     forecast = grey_zone_forecast(
         path, start_time=start_time, resolution=resolution, grid=grid
@@ -91,6 +111,18 @@ def make_plots(cubes, lead_time, output_path="./", replace_existing=False):
             if replace_existing or not fname.exists():
                 try:
                     cube = irise.convert.calc(name, cubes)
+                    function(cube, *args, **kwargs)
+                    eurec4a.add_halo_circle(ax=plt.gca())
+                    plt.savefig(fname)
+                    plt.close()
+                except ValueError:
+                    print("{} not in cubelist at this time".format(name))
+
+        elif callable(levels):
+            fname = pathlib.Path(output_path + "/{}_T+{}.png".format(name, lead_time))
+            if replace_existing or not fname.exists():
+                try:
+                    cube = levels(cubes)
                     function(cube, *args, **kwargs)
                     eurec4a.add_halo_circle(ax=plt.gca())
                     plt.savefig(fname)
