@@ -69,10 +69,8 @@ def main(path, start_time, resolution, data_grid, coarse_factor=4, output_path="
         )[0]
 
     vars_by_quartile = iris.cube.CubeList()
-    for lead_time in range(24, 48 + 1):
-        print(lead_time)
-
-        cubes = forecast.set_lead_time(hours=lead_time)
+    for cubes in forecast:
+        print(forecast.lead_time)
         specific_fixes(cubes)
 
         if data_grid == "lagrangian_grid":
@@ -82,7 +80,7 @@ def main(path, start_time, resolution, data_grid, coarse_factor=4, output_path="
 
         qt_column = convert.calc("total_column_water", cubes)
         qt_column = qt_column.regrid(qt_meso, AreaWeighted())
-        for cube in average_by_quartile(qt_column, [A, B_v, B_h, C, qt_column]):
+        for cube in average_by_quartile(qt_column, [A, B_v, B_h, C, qt_column, qt_meso]):
             cube.remove_coord("grid_longitude")
             cube.remove_coord("grid_latitude")
             vars_by_quartile.append(cube)
