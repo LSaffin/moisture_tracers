@@ -38,7 +38,7 @@ from iris.util import squeeze
 
 from twinotter.util.scripting import parse_docopt_arguments
 from twinotter.external.eurec4a import add_halo_circle
-from twinotter.external.goes import load_nc
+from twinotter.external.goes import load_nc, load_ceres
 from twinotter.external.goes.plot import geocolor
 
 
@@ -96,21 +96,31 @@ def toa_brightness_temperature(ax, ds, projection):
     )
 
 
-def goes_regridded(path, time, lons, lats, bands):
-    ds = load_nc(path, time)
+def goes_regridded(path, time, lons, lats, variables, source="goes"):
+    if source.lower() == "goes":
+        ds = load_nc(path, time)
+    elif source.lower() == "ceres":
+        ds = load_ceres(path, time)
+    else:
+        raise KeyError("Source {} not supported. Select either 'goes' or 'ceres'".format(source))
+
+    # Flatten and remove NaNs. The NaNs aren't in a square grid so can't be dropped on
+    # loading
+    mask = np.isnan(ds.longitude.values.flatten())
+    x = ds.longitude.values.flatten()[~mask]
+    y = ds.latitude.values.flatten()[~mask]
+
+    # Make sure to loop over variables as a list if only one is requested
+    if isinstance(variables, str):
+        variables = [variables]
+
     # Interpolate the satellite data to a regular grid
     goes_data_grid = xr.Dataset(coords=dict(longitude=lons[0, :], latitude=lats[:, 0]))
-    for band in bands:
-        band_grid = griddata(
-            (
-                ds["longitude"].values.flatten(),
-                ds["latitude"].values.flatten(),
-            ),
-            ds[band].values.flatten(),
-            (lons, lats),
-        )
+    for variable in variables:
+        data = ds[variable].values.flatten()[~mask]
+        variable_on_grid = griddata((x, y), data, (lons, lats))
 
-        goes_data_grid[band] = (["latitude", "longitude"], band_grid)
+        goes_data_grid[variable] = (["latitude", "longitude"], variable_on_grid)
 
     return goes_data_grid
 
