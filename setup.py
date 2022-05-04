@@ -9,6 +9,12 @@ requirements = [
     "tqdm",
     "parse",
     "Pillow",
+    "python-dateutil",
+    "scitools-iris",
+    "matplotlib",
+    "numpy",
+    "scipy",
+    "twinotter",
 ]
 
 test_requirements = [
