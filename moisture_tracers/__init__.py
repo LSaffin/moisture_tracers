@@ -22,6 +22,10 @@ model_filename = "*_{start_time}_T+{lead_time:02d}.nc"
 # YYYYMMDDTHHMM_DomainResolution_T+HH_coarse_grid.nc
 regridded_filename = "{start_time}_{resolution}_T+{lead_time:02d}_{grid}.nc"
 
+start_times = ["20200123", "20200201", "20200204", "20200206", "20200208"]
+resolutions = ["D100m_150m", "D100m_300m", "D100m_500m", "km1p1", "km2p2", "km4p4"]
+grids = ["coarse_grid", "lagrangian_grid"]
+
 
 def grey_zone_forecast(
         path=datadir + "regridded/",
