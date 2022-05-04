@@ -35,6 +35,7 @@ import xarray as xr
 import iris
 from iris.analysis import cartography
 from iris.util import squeeze
+import cmcrameri
 
 from twinotter.util.scripting import parse_docopt_arguments
 from twinotter.external.eurec4a import add_halo_circle
@@ -61,23 +62,28 @@ def main(
     time = t0
     while time <= t1:
         print(time)
-        goes_data_grid = goes_regridded(
-            satellite_path, time, lons, lats, plot_types[plot_type]["bands"]
-        )
 
-        ax = plt.axes(projection=projection)
-        im = plot_types[plot_type]["plot_func"](ax, goes_data_grid, projection)
-        add_halo_circle(ax)
-
-        if plot_type != "geocolor":
-            plt.colorbar(im, orientation="horizontal")
-        plt.savefig(
-            output_path
-            + "/{}_regrid_T+{:02d}.png".format(
-                plot_type, int((time - t0).total_seconds() // 3600)
+        try:
+            goes_data_grid = goes_regridded(
+                satellite_path, time, lons, lats, plot_types[plot_type]["bands"]
             )
-        )
-        plt.close()
+
+            ax = plt.axes(projection=projection)
+            im = plot_types[plot_type]["plot_func"](ax, goes_data_grid, projection)
+            ax.coastlines()
+            add_halo_circle(ax, alpha=0.75, linewidth=3)
+
+            if plot_type != "geocolor":
+                plt.colorbar(im, orientation="horizontal")
+            plt.savefig(
+                output_path
+                + "/{}_regrid_{}.png".format(
+                    plot_type, time.strftime("%Y%m%d_%H%M")
+                )
+            )
+            plt.close()
+        except FileNotFoundError as e:
+            print(e)
 
         time += dt
 
@@ -90,9 +96,9 @@ def toa_brightness_temperature(ax, ds, projection):
         y,
         ds["temp_11_0um_nom"],
         transform=projection,
-        vmin=280,
+        vmin=270,
         vmax=300,
-        cmap="cividis_r",
+        cmap="cmc.nuuk_r",
     )
 
 
