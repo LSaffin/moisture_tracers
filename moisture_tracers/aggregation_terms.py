@@ -25,6 +25,7 @@ Options:
 import numpy as np
 import iris
 from iris.analysis import AreaWeighted, MEAN, SUM, PERCENTILE, Linear
+from iris.analysis.cartography import area_weights
 from iris.analysis.calculus import differentiate
 from iris.coords import AuxCoord
 from iris.util import broadcast_to_shape
@@ -76,11 +77,17 @@ def main(path, start_time, resolution, data_grid, coarse_factor=4, output_path="
         if data_grid == "lagrangian_grid":
             subtract_winds(cubes, tr)
 
-        qt_meso, A, B_v, B_h, C = get_aggregation_terms(cubes, coarse_factor)
+        qt_meso, A_v, A_h, B_v, B_h, C = get_aggregation_terms(cubes, coarse_factor)
 
         qt_column = convert.calc("total_column_water", cubes)
         qt_column = qt_column.regrid(qt_meso, AreaWeighted())
-        for cube in average_by_quartile(qt_column, [A, B_v, B_h, C, qt_column, qt_meso]):
+
+        rho = convert.calc("air_density", cubes)
+        rho_mean, rho_meso, rho_cu = decompose_scales(rho, coarse_factor=coarse_factor)
+        rho = rho_mean + rho_meso
+        rho.rename("mesoscale_density")
+
+        for cube in average_by_quartile(qt_column, [A_v, A_h, B_v, B_h, C, qt_column, qt_meso, rho], rho):
             cube.remove_coord("grid_longitude")
             cube.remove_coord("grid_latitude")
             vars_by_quartile.append(cube)
@@ -133,20 +140,23 @@ def get_aggregation_terms(cubes, coarse_factor):
     v_mean, v_meso, v_cu = decompose_scales(v, coarse_factor=coarse_factor)
     w_mean, w_meso, w_cu = decompose_scales(w, coarse_factor=coarse_factor)
 
-    A = advection_of_mesoscale_variability(qt_meso, u_meso + u_mean, v_meso + v_mean)
+    A_v, A_h = advection_of_mesoscale_variability(qt_meso, u_meso + u_mean, v_meso + v_mean, w_meso + w_mean)
     B_v, B_h = cumulus_fluxes(density, qt_meso, qt_cu, u_cu, v_cu, w_cu)
     C = mesoscale_vertical_advection_of_mean_state(qt_mean, w_meso)
 
-    return qt_meso, A, B_v, B_h, C
+    qt_meso.rename("mesoscale_total_water_content")
+
+    return qt_meso, A_v, A_h, B_v, B_h, C
 
 
-def average_by_quartile(qt_column, cubes):
+def average_by_quartile(qt_column, cubes, density):
     """
     Get the average of each of the cubes in the four quartiles of qt_column
 
     Args:
         qt_column (iris.cube.Cube):
         cubes (iris.cube.CubeList):
+        density (iris.cube.Cube):
 
     Returns:
         iris.cube.CubeList:
@@ -155,6 +165,9 @@ def average_by_quartile(qt_column, cubes):
     quartiles = qt_column.collapsed(
         ["grid_longitude", "grid_latitude"], PERCENTILE, percent=[25, 50, 75]
     )
+
+    weights_2d = area_weights(qt_column)
+    weights_3d = (grid.volume(density) * density).data
 
     vars_by_quartile = iris.cube.CubeList()
     for n in range(4):
@@ -172,11 +185,11 @@ def average_by_quartile(qt_column, cubes):
         for m, cube in enumerate(cubes):
             if cube.ndim == 2:
                 by_quartile = cube.collapsed(
-                    ["grid_longitude", "grid_latitude"], MEAN, weights=mask[0]
+                    ["grid_longitude", "grid_latitude"], MEAN, weights=mask[0]*weights_2d
                 )
             else:
                 by_quartile = cube.collapsed(
-                    ["grid_longitude", "grid_latitude"], MEAN, weights=mask
+                    ["grid_longitude", "grid_latitude"], MEAN, weights=mask * weights_3d
                 )
             by_quartile.add_aux_coord(AuxCoord(points=n + 1, long_name="quartile"))
             vars_by_quartile.append(by_quartile)
@@ -218,13 +231,18 @@ def plot_timeseries():
     plt.show()
 
 
-def advection_of_mesoscale_variability(qt_meso, u_meso, v_meso):
-    dqt_dx, dqt_dy, _ = calculus.grad(qt_meso)
+def advection_of_mesoscale_variability(qt_meso, u_meso, v_meso, w_meso):
+    dqt_dx, dqt_dy, dqt_dz = calculus.grad(qt_meso)
 
-    A = -(u_meso * dqt_dx + v_meso * dqt_dy)
-    A.rename("advection_of_mesoscale_variability")
+    dqt_dz.units = "m-1"
 
-    return A
+    A_v = -(w_meso * dqt_dz)
+    A_v.rename("vertical_advection_of_mesoscale_variability")
+
+    A_h = -(u_meso * dqt_dx + v_meso * dqt_dy)
+    A_h.rename("horizontal_advection_of_mesoscale_variability")
+
+    return A_v, A_h
 
 
 def cumulus_fluxes(density, qt_meso, qt_cu, u_cu, v_cu, w_cu):
