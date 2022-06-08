@@ -69,5 +69,5 @@ def decompose_scales(cube, coarse_factor=4):
     return cube_mean, cube_mesoscale, cube_small_scale
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

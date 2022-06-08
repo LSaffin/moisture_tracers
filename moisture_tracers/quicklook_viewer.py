@@ -12,8 +12,8 @@ import parse
 
 
 class QuicklookGrid(ttk.Frame):
-    """Frame to hold multiple quicklook viewers
-    """
+    """Frame to hold multiple quicklook viewers"""
+
     def __init__(self, path, lookup, parent, *args, **kwargs):
         self.path = path
         self.lookup = lookup

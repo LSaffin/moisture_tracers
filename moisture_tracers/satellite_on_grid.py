@@ -77,9 +77,7 @@ def main(
                 plt.colorbar(im, orientation="horizontal")
             plt.savefig(
                 output_path
-                + "/{}_regrid_{}.png".format(
-                    plot_type, time.strftime("%Y%m%d_%H%M")
-                )
+                + "/{}_regrid_{}.png".format(plot_type, time.strftime("%Y%m%d_%H%M"))
             )
             plt.close()
         except FileNotFoundError as e:
@@ -108,7 +106,9 @@ def goes_regridded(path, time, lons, lats, variables, source="goes"):
     elif source.lower() == "ceres":
         ds = load_ceres(path, time)
     else:
-        raise KeyError("Source {} not supported. Select either 'goes' or 'ceres'".format(source))
+        raise KeyError(
+            "Source {} not supported. Select either 'goes' or 'ceres'".format(source)
+        )
 
     # Flatten and remove NaNs. The NaNs aren't in a square grid so can't be dropped on
     # loading

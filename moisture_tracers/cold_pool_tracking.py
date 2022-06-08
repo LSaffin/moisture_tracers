@@ -7,7 +7,7 @@ import iris.plot as iplt
 
 from irise import plot
 
-colours = plt.rcParams['axes.prop_cycle'].by_key()['color']
+colours = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
 
 def cold_pool_mask(dq_evap):
@@ -25,8 +25,7 @@ def cold_pool_mask(dq_evap):
 
 
 def identify_possibles(forecast):
-    """Plot and label cold-pool contours at each timestep
-    """
+    """Plot and label cold-pool contours at each timestep"""
     for n, cubes in enumerate(forecast):
         print(n)
         plt.figure(figsize=(8, 5))
@@ -37,8 +36,15 @@ def identify_possibles(forecast):
 
         for m, contour in enumerate(contours):
             # Resulting contour is 180 off the actual data coordinates. No idea why
-            plt.plot(contour[:, 0] - 180, contour[:, 1], color=colours[m % len(colours)])
-            plt.text(contour[0, 0] - 180, contour[0, 1], str(m), color=colours[m % len(colours)])
+            plt.plot(
+                contour[:, 0] - 180, contour[:, 1], color=colours[m % len(colours)]
+            )
+            plt.text(
+                contour[0, 0] - 180,
+                contour[0, 1],
+                str(m),
+                color=colours[m % len(colours)],
+            )
 
         plt.savefig("cold_pools_T+{:02d}.png".format(n))
         plt.close()
@@ -60,7 +66,9 @@ def filter_invalid(contours):
 
     """
     # Sort contours by distance
-    contours = sorted([contour for contour in contours if len(contour) > 2], key=contour_length)
+    contours = sorted(
+        [contour for contour in contours if len(contour) > 2], key=contour_length
+    )
     polygons = [Polygon(contour) for contour in contours]
 
     # Check whether the shorter contours are contained by the longer contours
@@ -92,7 +100,7 @@ def contour_length(points):
     """
     conlen = haversine(points[-1], points[0])
     for n in range(len(points) - 1):
-        conlen += haversine(points[n], points[n+1])
+        conlen += haversine(points[n], points[n + 1])
 
     return conlen
 
@@ -119,7 +127,7 @@ def is_closed_contour(contour_section, threshold=0.1):
 
 
 def haversine(x1, x2):
-    """ Calculate the great circle distance between two points on the earth
+    """Calculate the great circle distance between two points on the earth
     (specified in decimal degrees)
     """
     # convert decimal degrees to radians
@@ -128,7 +136,7 @@ def haversine(x1, x2):
     # haversine formula
     dlon = lon2 - lon1
     dlat = lat2 - lat1
-    a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2
+    a = np.sin(dlat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
     c = 2 * np.arcsin(np.sqrt(a))
     r = 6371  # Radius of earth in kilometers
     return c * r
@@ -137,4 +145,5 @@ def haversine(x1, x2):
 if __name__ == "__main__":
     import datetime
     from . import grey_zone_forecast
+
     identify_possibles(grey_zone_forecast("", datetime.datetime(2020, 2, 1)))

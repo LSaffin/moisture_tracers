@@ -44,7 +44,7 @@ def main(path, start_time, resolution, grid, output_path="./"):
             resolution,
             grid,
         ),
-        np.array(circulation)
+        np.array(circulation),
     )
 
 
@@ -66,9 +66,9 @@ def calc_circulation(cubes, levels):
     lon = np.deg2rad(p.coord("grid_longitude").points)
     lat = np.deg2rad(p.coord("grid_latitude").points)
 
-    dx_1 = np.broadcast_to(a * np.cos(lat[0]) * np.diff(lon), [nz, nx-1])
-    dx_2 = np.broadcast_to(a * np.cos(lat[-1]) * np.diff(lon), [nz, nx-1])
-    dy = np.broadcast_to(a * np.diff(lat), [nz, ny-1])
+    dx_1 = np.broadcast_to(a * np.cos(lat[0]) * np.diff(lon), [nz, nx - 1])
+    dx_2 = np.broadcast_to(a * np.cos(lat[-1]) * np.diff(lon), [nz, nx - 1])
+    dy = np.broadcast_to(a * np.diff(lat), [nz, ny - 1])
 
     # Calculate circulation anticlockwise along each boundary of the domain
     # bottom + right - top - left
@@ -101,5 +101,5 @@ def plot_all():
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parse_docopt_arguments(main, __doc__)

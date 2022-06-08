@@ -36,7 +36,7 @@ budgets = dict(
     microphysics_q=[
         "microphysics_cloud_q",
         "rainfall_evaporation_q",
-    ]
+    ],
 )
 
 
@@ -48,8 +48,14 @@ def main(filename, budget):
 
     for k in tqdm(range(40)):
         check_budget(
-            tracers, budget, budgets[budget],
-            ncols=2, k=k, vmin=-1e-3, vmax=1e-3, cmap="seismic_r"
+            tracers,
+            budget,
+            budgets[budget],
+            ncols=2,
+            k=k,
+            vmin=-1e-3,
+            vmax=1e-3,
+            cmap="seismic_r",
         )
         plt.savefig(plotdir + "{}_budget_k{}.png".format(budget, k))
         plt.close()

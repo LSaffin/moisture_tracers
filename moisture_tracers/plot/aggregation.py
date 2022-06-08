@@ -37,7 +37,8 @@ def main(path, start_time, resolution, model_grid, output_path="./"):
     start_time = dateparse(start_time)
 
     cubes = iris.load(
-        path + "aggregation_terms_by_quartile_{}_{}_{}.nc".format(
+        path
+        + "aggregation_terms_by_quartile_{}_{}_{}.nc".format(
             start_time.strftime("%Y%m%d"),
             resolution,
             model_grid,
@@ -50,36 +51,48 @@ def main(path, start_time, resolution, model_grid, output_path="./"):
             iris.Constraint(time=lambda cell: cell.point == time)
         )
         vertical_profile(cubes_at_time)
-        plt.savefig(output_path + "aggregation_terms/aggregation_terms_{}_{}_{}_T+{}".format(
-            start_time.strftime("%Y%m%d"),
-            resolution,
-            model_grid,
-            (time - start_time).total_seconds() // 3600,
-        ))
+        plt.savefig(
+            output_path
+            + "aggregation_terms/aggregation_terms_{}_{}_{}_T+{}".format(
+                start_time.strftime("%Y%m%d"),
+                resolution,
+                model_grid,
+                (time - start_time).total_seconds() // 3600,
+            )
+        )
         plt.close()
 
     column_average(cubes)
-    plt.savefig(output_path + "aggregation_terms/aggregation_terms_column_sum_{}_{}_{}".format(
-        start_time.strftime("%Y%m%d"),
-        resolution,
-        model_grid,
-    ))
+    plt.savefig(
+        output_path
+        + "aggregation_terms/aggregation_terms_column_sum_{}_{}_{}".format(
+            start_time.strftime("%Y%m%d"),
+            resolution,
+            model_grid,
+        )
+    )
     plt.close()
 
     column_water_variation(cubes)
-    plt.savefig(output_path + "column_water_aggregation/column_water_aggregation_{}_{}_{}".format(
-        start_time.strftime("%Y%m%d"),
-        resolution,
-        model_grid,
-    ))
+    plt.savefig(
+        output_path
+        + "column_water_aggregation/column_water_aggregation_{}_{}_{}".format(
+            start_time.strftime("%Y%m%d"),
+            resolution,
+            model_grid,
+        )
+    )
     plt.close()
 
     column_water_by_quartile(cubes)
-    plt.savefig(output_path + "column_water_aggregation/column_water_by_quartile_{}_{}_{}".format(
-        start_time.strftime("%Y%m%d"),
-        resolution,
-        model_grid,
-    ))
+    plt.savefig(
+        output_path
+        + "column_water_aggregation/column_water_by_quartile_{}_{}_{}".format(
+            start_time.strftime("%Y%m%d"),
+            resolution,
+            model_grid,
+        )
+    )
     plt.close()
 
 
@@ -97,7 +110,7 @@ def vertical_profile(cubes):
             z = cube.coord("height_above_reference_ellipsoid")
 
         for m in range(4):
-            iplt.plot(cube[m, :], z, label=m+1)
+            iplt.plot(cube[m, :], z, label=m + 1)
 
     plt.legend()
 
@@ -109,7 +122,9 @@ def column_average(cubes):
         if dz is None:
             dz = grid.thickness(cube)
 
-        cube_col = cube.collapsed(["atmosphere_hybrid_height_coordinate"], SUM, weights=dz.data)
+        cube_col = cube.collapsed(
+            ["atmosphere_hybrid_height_coordinate"], SUM, weights=dz.data
+        )
 
         iplt.plot(cube_col[:, -1], label=short_name)
 
@@ -128,7 +143,7 @@ def column_water_variation(cubes):
 def column_water_by_quartile(cubes):
     qt_by_quartile = cubes.extract_cube("total_column_water")
     for n in range(4):
-        iplt.plot(qt_by_quartile[:, n], label=n+1)
+        iplt.plot(qt_by_quartile[:, n], label=n + 1)
 
     plt.ylabel("total column water")
     plt.gcf().autofmt_xdate()
@@ -137,5 +152,6 @@ def column_water_by_quartile(cubes):
 
 if __name__ == "__main__":
     import warnings
+
     warnings.filterwarnings("ignore")
     parse_docopt_arguments(__doc__, main)

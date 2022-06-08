@@ -1,8 +1,8 @@
 """Top-level package for moisture_tracers."""
 
 __author__ = """Leo Saffin"""
-__email__ = 'l.saffin@leeds.ac.uk'
-__version__ = '0.1.0'
+__email__ = "l.saffin@leeds.ac.uk"
+__version__ = "0.1.0"
 
 
 import datetime
@@ -28,11 +28,11 @@ grids = ["coarse_grid", "lagrangian_grid"]
 
 
 def grey_zone_forecast(
-        path=datadir + "regridded/",
-        start_time="2020-02-01",
-        resolution="km4p4",
-        lead_times=range(48+1),
-        grid="coarse_grid",
+    path=datadir + "regridded/",
+    start_time="2020-02-01",
+    resolution="km4p4",
+    lead_times=range(48 + 1),
+    grid="coarse_grid",
 ):
     """Return an irise.forecast.Forecast for an individual grey-zone simulation
 
@@ -54,24 +54,29 @@ def grey_zone_forecast(
 
     if grid is None:
         mapping = {
-            start_time + datetime.timedelta(hours=dt): [
-                path + model_filename.format(
-                    start_time=start_time_str,
-                    lead_time=max(0, dt-1)
+            start_time
+            + datetime.timedelta(hours=dt): [
+                path
+                + model_filename.format(
+                    start_time=start_time_str, lead_time=max(0, dt - 1)
                 ),
-            ] for dt in lead_times
+            ]
+            for dt in lead_times
         }
 
     else:
         mapping = {
-            start_time + datetime.timedelta(hours=dt): [
-                path + regridded_filename.format(
+            start_time
+            + datetime.timedelta(hours=dt): [
+                path
+                + regridded_filename.format(
                     start_time=start_time_str,
                     resolution=resolution,
                     lead_time=dt,
                     grid=grid,
                 ),
-            ] for dt in lead_times
+            ]
+            for dt in lead_times
         }
 
     return Forecast(start_time, mapping)

@@ -63,7 +63,8 @@ def main(path, start_time, resolution, data_grid, coarse_factor=4, output_path="
 
     if data_grid == "lagrangian_grid":
         tr = trajectory.load(
-            datadir + "trajectories/trajectories_{}_{}_500m.pkl".format(
+            datadir
+            + "trajectories/trajectories_{}_{}_500m.pkl".format(
                 forecast.start_time.strftime("%Y%m%d"),
                 resolution,
             )
@@ -87,7 +88,9 @@ def main(path, start_time, resolution, data_grid, coarse_factor=4, output_path="
         rho = rho_mean + rho_meso
         rho.rename("mesoscale_density")
 
-        for cube in average_by_quartile(qt_column, [A_v, A_h, B_v, B_h, C, qt_column, qt_meso, rho], rho):
+        for cube in average_by_quartile(
+            qt_column, [A_v, A_h, B_v, B_h, C, qt_column, qt_meso, rho], rho
+        ):
             cube.remove_coord("grid_longitude")
             cube.remove_coord("grid_latitude")
             vars_by_quartile.append(cube)
@@ -112,7 +115,7 @@ def subtract_winds(cubes, tr):
     t_index = tr.times.index(time)
 
     u.data -= tr["x_wind"][t_index]
-    v.data -= tr["y_wind"][t_index] 
+    v.data -= tr["y_wind"][t_index]
 
 
 def get_aggregation_terms(cubes, coarse_factor):
@@ -140,7 +143,9 @@ def get_aggregation_terms(cubes, coarse_factor):
     v_mean, v_meso, v_cu = decompose_scales(v, coarse_factor=coarse_factor)
     w_mean, w_meso, w_cu = decompose_scales(w, coarse_factor=coarse_factor)
 
-    A_v, A_h = advection_of_mesoscale_variability(qt_meso, u_meso + u_mean, v_meso + v_mean, w_meso + w_mean)
+    A_v, A_h = advection_of_mesoscale_variability(
+        qt_meso, u_meso + u_mean, v_meso + v_mean, w_meso + w_mean
+    )
     B_v, B_h = cumulus_fluxes(density, qt_meso, qt_cu, u_cu, v_cu, w_cu)
     C = mesoscale_vertical_advection_of_mean_state(qt_mean, w_meso)
 
@@ -185,7 +190,9 @@ def average_by_quartile(qt_column, cubes, density):
         for m, cube in enumerate(cubes):
             if cube.ndim == 2:
                 by_quartile = cube.collapsed(
-                    ["grid_longitude", "grid_latitude"], MEAN, weights=mask[0]*weights_2d
+                    ["grid_longitude", "grid_latitude"],
+                    MEAN,
+                    weights=mask[0] * weights_2d,
                 )
             else:
                 by_quartile = cube.collapsed(
@@ -299,7 +306,8 @@ def precipitation_mass_flux():
 
 if __name__ == "__main__":
     import warnings
+
     warnings.filterwarnings("ignore")
 
     parse_docopt_arguments(main, __doc__)
-    #plot_timeseries()
+    # plot_timeseries()

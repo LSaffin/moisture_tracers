@@ -48,5 +48,5 @@ def main():
     plt.savefig(plotdir + "sugar_to_flowers_transition.png")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -72,20 +72,39 @@ def get_wind_shear(cubes):
     du_dz = u[1] - u[0]
     dv_dz = v[1] - v[0]
 
-    return (du_dz**2 + dv_dz**2)**0.5
+    return (du_dz ** 2 + dv_dz ** 2) ** 0.5
 
 
 def get_lts(cubes):
-    theta = irise.convert.calc("air_potential_temperature", cubes, levels=("air_pressure", [70000, 100000]))
+    theta = irise.convert.calc(
+        "air_potential_temperature", cubes, levels=("air_pressure", [70000, 100000])
+    )
 
     return theta[1] - theta[0]
 
 
-diagnostics["wind_shear"] = [get_wind_shear, plot.pcolormesh, [], dict(vmin=0, vmax=10, cmap="cubehelix_r")]
-diagnostics["lower_tropospheric_stability"] = [get_lts, plot.pcolormesh, [], dict(vmin=-30, vmax=-15, cmap="cubehelix")]
+diagnostics["wind_shear"] = [
+    get_wind_shear,
+    plot.pcolormesh,
+    [],
+    dict(vmin=0, vmax=10, cmap="cubehelix_r"),
+]
+diagnostics["lower_tropospheric_stability"] = [
+    get_lts,
+    plot.pcolormesh,
+    [],
+    dict(vmin=-30, vmax=-15, cmap="cubehelix"),
+]
 
 
-def main(path, start_time, resolution=None, grid=None, output_path="./", replace_existing=False):
+def main(
+    path,
+    start_time,
+    resolution=None,
+    grid=None,
+    output_path="./",
+    replace_existing=False,
+):
     forecast = grey_zone_forecast(
         path, start_time=start_time, resolution=resolution, grid=grid
     )
@@ -96,7 +115,7 @@ def main(path, start_time, resolution=None, grid=None, output_path="./", replace
             cubes,
             forecast.lead_time,
             output_path=output_path,
-            replace_existing=replace_existing
+            replace_existing=replace_existing,
         )
 
 
@@ -132,22 +151,28 @@ def make_plots(cubes, lead_time, output_path="./", replace_existing=False):
 
         else:
             fnames = [
-                pathlib.Path(output_path + "{}_{}{}_T+{}.png".format(
-                    name,
-                    levels[0],
-                    level,
-                    lead_time
-                )) for level in levels[1]]
+                pathlib.Path(
+                    output_path
+                    + "{}_{}{}_T+{}.png".format(name, levels[0], level, lead_time)
+                )
+                for level in levels[1]
+            ]
 
             if replace_existing:
                 levels_to_plot = levels[1]
             else:
-                levels_to_plot = [levels[1][n] for n, path in enumerate(fnames) if not path.exists()]
-                fnames = [fnames[n] for n, path in enumerate(fnames) if not path.exists()]
+                levels_to_plot = [
+                    levels[1][n] for n, path in enumerate(fnames) if not path.exists()
+                ]
+                fnames = [
+                    fnames[n] for n, path in enumerate(fnames) if not path.exists()
+                ]
 
             if len(levels_to_plot) > 0:
                 try:
-                    cube = irise.convert.calc(name, cubes, levels=(levels[0], levels_to_plot))
+                    cube = irise.convert.calc(
+                        name, cubes, levels=(levels[0], levels_to_plot)
+                    )
                     for n in range(len(levels_to_plot)):
                         function(cube[n], *args, **kwargs)
                         eurec4a.add_halo_circle(ax=plt.gca())
