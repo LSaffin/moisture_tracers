@@ -56,7 +56,7 @@ def main(
     t1 = parse(last_time)
     dt = datetime.timedelta(minutes=int(interval))
 
-    lons, lats = get_grid(forecast_filename)
+    cube, lons, lats = get_grid(forecast_filename)
     projection = ccrs.PlateCarree()
 
     time = t0
@@ -159,7 +159,7 @@ def get_grid(forecast_filename):
         rotated_lons, rotated_lats, pole_lon, pole_lat
     )
 
-    return lons, lats
+    return grid, lons, lats
 
 
 plot_types = dict(
