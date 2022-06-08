@@ -56,11 +56,12 @@ def main():
     ax.coastlines()
     eurec4a.add_halo_circle(ax, alpha=0.75, lw=3)
 
-    plt.savefig(plotdir + "fig4_lagrangian_domain_example_1p1km.png")
+    plt.savefig(plotdir + "fig3_lagrangian_domain_example_1p1km.png")
 
 
 if __name__ == "__main__":
     import warnings
+
     warnings.filterwarnings("ignore")
 
     main()

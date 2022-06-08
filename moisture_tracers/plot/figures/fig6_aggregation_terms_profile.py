@@ -91,11 +91,12 @@ def main():
     )
     fig.text(0.0, 0.5, "Altitude (m)", rotation="vertical", va="center")
 
-    plt.savefig(plotdir + "fig7_aggregation_terms_profile_t+34.png")
+    plt.savefig(plotdir + "fig6_aggregation_terms_profile_t+34.png")
 
 
 if __name__ == "__main__":
     import warnings
+
     warnings.filterwarnings("ignore")
 
     main()

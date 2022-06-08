@@ -8,7 +8,11 @@ import irise
 
 from moisture_tracers import datadir, plotdir
 from moisture_tracers.plot.figures import linestyles, labels
-from moisture_tracers.plot.figures.fig6_aggregation_terms_profile import aggregation_terms_fname, titles, terms
+from moisture_tracers.plot.figures.fig6_aggregation_terms_profile import (
+    aggregation_terms_fname,
+    titles,
+    terms,
+)
 
 
 grid = "lagrangian_grid"
@@ -78,11 +82,12 @@ def main():
         va="center",
     )
 
-    plt.savefig(plotdir + "fig8_aggregation_terms_by_column.png")
+    plt.savefig(plotdir + "fig7_aggregation_terms_by_column.png")
 
 
 if __name__ == "__main__":
     import warnings
+
     warnings.filterwarnings("ignore")
 
     main()
