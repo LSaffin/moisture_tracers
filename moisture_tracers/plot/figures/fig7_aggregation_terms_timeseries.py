@@ -6,7 +6,7 @@ from iris.analysis import PERCENTILE
 import matplotlib.pyplot as plt
 import irise
 
-from moisture_tracers import datadir, plotdir
+from moisture_tracers import plotdir
 from moisture_tracers.plot.figures import linestyles, labels
 from moisture_tracers.plot.figures.fig6_aggregation_terms_profile import (
     aggregation_terms_fname,

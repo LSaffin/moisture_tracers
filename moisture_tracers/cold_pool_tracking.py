@@ -11,7 +11,7 @@ colours = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
 
 def cold_pool_mask(dq_evap):
-    # 2d mask of cold pool based on surface evaporations
+    # 2d mask of cold pool based on surface evaporation
     mask_cold_pool_2d = dq_evap[0].data > 1e-4
 
     # Expand mask to all levels (3d)

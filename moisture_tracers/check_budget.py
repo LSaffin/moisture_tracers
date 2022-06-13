@@ -16,9 +16,10 @@ from math import ceil
 
 from tqdm import tqdm
 import numpy as np
-import iris
-import matplotlib.pyplot as plt
+from iris.analysis import MEAN
 import iris.plot as iplt
+import matplotlib.pyplot as plt
+
 
 import irise
 from irise import convert
@@ -123,7 +124,7 @@ def domain_mean_profile(tracers, budget):
         cube = convert.calc(name, tracers)
         to_plot = cube.collapsed(
             ["grid_latitude", "grid_longitude"],
-            iris.analysis.MEAN,
+            MEAN,
             weights=weights,
         )
         iplt.plot(to_plot, z, label=cube.name())

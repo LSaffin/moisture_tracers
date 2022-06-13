@@ -93,7 +93,7 @@ def plot_all():
 
     for filename in filenames:
         print(filename)
-        circulation = np.load(filename)
+        circulation = np.load(str(filename))
         resolution = parse.parse("circulation_{}.npy", str(filename))[0]
         plt.plot(circulation[:, 0], label=resolution)
 

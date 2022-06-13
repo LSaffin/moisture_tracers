@@ -19,7 +19,6 @@ kwargs = dict(vmin=0, vmax=1, cmap="cmc.nuuk")
 
 lead_times = [35, 38, 42, 45]
 
-resolutions = ["1p1km"]
 height_factor = 10
 nrows = height_factor * (len(resolutions) + 1) + 2
 ncols = len(lead_times)
@@ -62,9 +61,9 @@ def make_plot(start_time, grid):
             grid_cube, lons, lats = satellite_on_grid.get_grid(filename)
 
         for n, resolution in enumerate(resolutions):
-            ax = plt.subplot2grid(
-                [nrows, ncols],
-                [height_factor * n, m],
+            plt.subplot2grid(
+                (nrows, ncols),
+                (height_factor * n, m),
                 rowspan=height_factor,
                 projection=projection,
             )
@@ -102,8 +101,8 @@ def make_plot(start_time, grid):
 
         # GOES
         ax = plt.subplot2grid(
-            [nrows, ncols],
-            [height_factor * len(resolutions), m],
+            (nrows, ncols),
+            (height_factor * len(resolutions), m),
             rowspan=height_factor,
             projection=projection,
         )
@@ -124,7 +123,7 @@ def make_plot(start_time, grid):
             ax.set_yticks([])
             ax.set_ylabel("GOES ")
 
-    ax = plt.subplot2grid([nrows, ncols], [nrows - 1, 0], colspan=ncols)
+    ax = plt.subplot2grid((nrows, ncols), (nrows - 1, 0), colspan=ncols)
     cbar = plt.colorbar(im, cax=ax, extend="both", orientation="horizontal")
     cbar.set_label(r"Reflectivity at 650 nm")
 

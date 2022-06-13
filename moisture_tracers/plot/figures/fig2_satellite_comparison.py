@@ -63,8 +63,8 @@ def make_plot(start_time, grid, resolutions, lead_times):
         for n, resolution in enumerate(resolutions):
             row = height_factor * n
             plt.subplot2grid(
-                [nrows, ncols],
-                [row, col],
+                (nrows, ncols),
+                (row, col),
                 rowspan=height_factor,
                 colspan=width_factor,
                 projection=projection,
@@ -83,7 +83,7 @@ def make_plot(start_time, grid, resolutions, lead_times):
 
             # Put the resolution at the left side of each row
             if m == 0:
-                # Need to regrab the axis because iplt.pcolormesh creates a new
+                # Need to re-grab the axis because iplt.pcolormesh creates a new
                 # one
                 ax = plt.gca()
                 ax.get_yaxis().set_visible(True)
@@ -93,8 +93,8 @@ def make_plot(start_time, grid, resolutions, lead_times):
         # GOES
         row = height_factor * len(resolutions)
         ax = plt.subplot2grid(
-            [nrows, ncols],
-            [row, col],
+            (nrows, ncols),
+            (row, col),
             rowspan=height_factor,
             colspan=width_factor,
             projection=projection,
@@ -122,13 +122,13 @@ def make_plot(start_time, grid, resolutions, lead_times):
     # Add colourbars
     # A vertical one for the model data spanning the model data rows
     ax = plt.subplot2grid(
-        [nrows, ncols], [0, ncols - 1], rowspan=len(resolutions) * height_factor
+        (nrows, ncols), (0, ncols - 1), rowspan=len(resolutions) * height_factor
     )
     cbar = plt.colorbar(im1, cax=ax, orientation="vertical")
     cbar.set_label(cbar_label)
 
     # A horizontal one for the satellite data at the bottom
-    ax = plt.subplot2grid([nrows, ncols], [nrows - 1, 0], colspan=ncols - 1)
+    ax = plt.subplot2grid((nrows, ncols), (nrows - 1, 0), colspan=ncols - 1)
     cbar = plt.colorbar(im2, cax=ax, orientation="horizontal")
     cbar.set_label(cbar_label_sat)
 

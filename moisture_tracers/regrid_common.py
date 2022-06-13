@@ -18,6 +18,7 @@ Options:
 import numpy as np
 
 import iris
+from iris.analysis import AreaWeighted
 from iris.coords import DimCoord
 
 from twinotter.util.scripting import parse_docopt_arguments
@@ -38,7 +39,7 @@ def main(path, start_time, resolution, target, output_path="."):
 
     for cubes in forecast:
         print(forecast.lead_time)
-        regridder = iris.analysis.AreaWeighted()
+        regridder = AreaWeighted()
         newcubes = iris.cube.CubeList()
         for cube in cubes:
             if cube.ndim > 1 and cube.name() not in ["longitude", "latitude"]:

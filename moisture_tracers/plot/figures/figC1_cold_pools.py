@@ -33,7 +33,7 @@ def main():
     nrows = len(variables)
     ncols = len(lead_times) * width_factor + 2
 
-    fig = plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(8, 5))
 
     for n, variable in enumerate(variables):
         row = n
@@ -41,8 +41,8 @@ def main():
             col = m * width_factor
 
             cubes = forecast.set_lead_time(hours=lead_time)
-            ax = plt.subplot2grid(
-                [nrows, ncols], [row, col], colspan=width_factor, projection=projection
+            plt.subplot2grid(
+                (nrows, ncols), (row, col), colspan=width_factor, projection=projection
             )
 
             cube = irise.convert.calc(variable, cubes)
@@ -64,8 +64,8 @@ def main():
                 ax.set_title(forecast.current_time.strftime("%H:%M"))
 
         ax = plt.subplot2grid(
-            [nrows, ncols],
-            [row, col + width_factor],
+            (nrows, ncols),
+            (row, col + width_factor),
         )
         cbar = plt.colorbar(im, cax=ax, extend="both", orientation="vertical")
         cbar.set_label(labels[n])

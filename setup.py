@@ -11,10 +11,14 @@ requirements = [
     "Pillow",
     "python-dateutil",
     "scitools-iris",
+    "xarray",
+    "cartopy",
     "matplotlib",
     "numpy",
     "scipy",
     "twinotter",
+    "cmcrameri",
+    "shapely",
 ]
 
 test_requirements = [

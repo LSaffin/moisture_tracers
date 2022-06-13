@@ -78,7 +78,7 @@ def main(path, start_time, resolution, data_grid, coarse_factor=4, output_path="
         if data_grid == "lagrangian_grid":
             subtract_winds(cubes, tr)
 
-        qt_meso, A_v, A_h, B_v, B_h, C = get_aggregation_terms(cubes, coarse_factor)
+        qt_meso, a_v, a_h, b_v, b_h, c = get_aggregation_terms(cubes, coarse_factor)
 
         qt_column = convert.calc("total_column_water", cubes)
         qt_column = qt_column.regrid(qt_meso, AreaWeighted())
@@ -89,7 +89,9 @@ def main(path, start_time, resolution, data_grid, coarse_factor=4, output_path="
         rho.rename("mesoscale_density")
 
         for cube in average_by_quartile(
-            qt_column, [A_v, A_h, B_v, B_h, C, qt_column, qt_meso, rho], rho
+            qt_column,
+            iris.cube.CubeList([a_v, a_h, b_v, b_h, c, qt_column, qt_meso, rho]),
+            rho,
         ):
             cube.remove_coord("grid_longitude")
             cube.remove_coord("grid_latitude")
@@ -143,15 +145,15 @@ def get_aggregation_terms(cubes, coarse_factor):
     v_mean, v_meso, v_cu = decompose_scales(v, coarse_factor=coarse_factor)
     w_mean, w_meso, w_cu = decompose_scales(w, coarse_factor=coarse_factor)
 
-    A_v, A_h = advection_of_mesoscale_variability(
+    a_v, a_h = advection_of_mesoscale_variability(
         qt_meso, u_meso + u_mean, v_meso + v_mean, w_meso + w_mean
     )
-    B_v, B_h = cumulus_fluxes(density, qt_meso, qt_cu, u_cu, v_cu, w_cu)
-    C = mesoscale_vertical_advection_of_mean_state(qt_mean, w_meso)
+    b_v, b_h = cumulus_fluxes(density, qt_meso, qt_cu, u_cu, v_cu, w_cu)
+    c = mesoscale_vertical_advection_of_mean_state(qt_mean, w_meso)
 
     qt_meso.rename("mesoscale_total_water_content")
 
-    return qt_meso, A_v, A_h, B_v, B_h, C
+    return qt_meso, a_v, a_h, b_v, b_h, c
 
 
 def average_by_quartile(qt_column, cubes, density):
@@ -243,13 +245,13 @@ def advection_of_mesoscale_variability(qt_meso, u_meso, v_meso, w_meso):
 
     dqt_dz.units = "m-1"
 
-    A_v = -(w_meso * dqt_dz)
-    A_v.rename("vertical_advection_of_mesoscale_variability")
+    a_v = -(w_meso * dqt_dz)
+    a_v.rename("vertical_advection_of_mesoscale_variability")
 
-    A_h = -(u_meso * dqt_dx + v_meso * dqt_dy)
-    A_h.rename("horizontal_advection_of_mesoscale_variability")
+    a_h = -(u_meso * dqt_dx + v_meso * dqt_dy)
+    a_h.rename("horizontal_advection_of_mesoscale_variability")
 
-    return A_v, A_h
+    return a_v, a_h
 
 
 def cumulus_fluxes(density, qt_meso, qt_cu, u_cu, v_cu, w_cu):
@@ -266,9 +268,9 @@ def cumulus_fluxes(density, qt_meso, qt_cu, u_cu, v_cu, w_cu):
     dwq_dz = density_meso.copy(data=dwq_dz.data)
     dwq_dz.units = units
 
-    B_v = dwq_dz / density_meso
+    b_v = dwq_dz / density_meso
 
-    B_v.rename("vertical_cumulus_fluxes")
+    b_v.rename("vertical_cumulus_fluxes")
 
     uq = (u_cu * qt_cu).regrid(qt_meso, AreaWeighted())
     vq = (v_cu * qt_cu).regrid(qt_meso, AreaWeighted())
@@ -279,11 +281,11 @@ def cumulus_fluxes(density, qt_meso, qt_cu, u_cu, v_cu, w_cu):
     dvq_dy = calculus.polar_horizontal(vq, "y")
     dvq_dy = dvq_dy.regrid(qt_meso, AreaWeighted())
 
-    B_h = -(duq_dx + dvq_dy)
+    b_h = -(duq_dx + dvq_dy)
 
-    B_h.rename("horizontal_cumulus_fluxes")
+    b_h.rename("horizontal_cumulus_fluxes")
 
-    return B_v, B_h
+    return b_v, b_h
 
 
 def mesoscale_vertical_advection_of_mean_state(qt_mean, w_meso):
@@ -294,10 +296,10 @@ def mesoscale_vertical_advection_of_mean_state(qt_mean, w_meso):
     dqt_dz.replace_coord(w_meso.coord("atmosphere_hybrid_height_coordinate"))
     dqt_dz = grid.broadcast_to_cube(dqt_dz, w_meso)
 
-    C = -w_meso * dqt_dz
-    C.rename("mesoscale_vertical_advection_of_background_moisture")
+    c = -w_meso * dqt_dz
+    c.rename("mesoscale_vertical_advection_of_background_moisture")
 
-    return C
+    return c
 
 
 def precipitation_mass_flux():

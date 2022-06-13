@@ -2,6 +2,7 @@ from string import ascii_lowercase
 import datetime
 
 import iris
+from iris.exceptions import ConcatenateError
 import iris.plot as iplt
 import matplotlib.pyplot as plt
 
@@ -44,7 +45,7 @@ def main():
                     cube = cubes.extract(diag + "_mean")
                     try:
                         cube = cube.concatenate_cube()
-                    except iris.exceptions.ConcatenateError:
+                    except ConcatenateError:
                         for c in cube:
                             c.coord("time").var_name = "time"
                             c.var_name = c.name()

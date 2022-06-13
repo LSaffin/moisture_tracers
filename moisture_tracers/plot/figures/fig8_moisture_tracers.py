@@ -2,6 +2,7 @@ import datetime
 from string import ascii_lowercase
 
 import iris
+from iris.exceptions import CoordinateNotFoundError
 import iris.plot as iplt
 from iris.analysis import PERCENTILE
 import matplotlib.pyplot as plt
@@ -9,7 +10,7 @@ import matplotlib.pyplot as plt
 import irise
 
 from moisture_tracers import datadir, plotdir
-from moisture_tracers.plot.figures import linestyles, labels
+from moisture_tracers.plot.figures import linestyles
 
 z_name = "altitude"
 
@@ -43,7 +44,7 @@ def main():
 
         try:
             dz = irise.grid.thickness(rho, z_name="altitude")
-        except iris.exceptions.CoordinateNotFoundError:
+        except CoordinateNotFoundError:
             dz = irise.grid.thickness(rho, z_name="height_above_reference_ellipsoid")
 
         mass = rho * dz

@@ -2,6 +2,7 @@ import datetime
 from string import ascii_lowercase
 
 import iris
+from iris.exceptions import CoordinateNotFoundError
 import iris.plot as iplt
 import matplotlib.pyplot as plt
 
@@ -14,7 +15,8 @@ titles = [
     r"$A = -(\bar{\mathbf{u}} + \mathbf{u}_\mathrm{m}) \cdot \nabla qt_\mathrm{m}$",
     r"$A_\mathrm{v} = -(\bar{w} + w_\mathrm{m}) \frac{\partial qt_\mathrm{m}}{\partial z}$",
     r"$A_\mathrm{h} = -(\bar{\mathbf{v}} + \mathbf{v}_\mathrm{m}) \cdot \nabla_\mathrm{h} qt_\mathrm{m}$",
-    r"$B_\mathrm{v} = \frac{1}{\rho} \frac{\partial}{\partial z} \left[\rho w_\mathrm{cu} qt_\mathrm{cu} \right]_\mathrm{m}$",
+    r"$B_\mathrm{v} = \frac{1}{\rho} \frac{\partial}{\partial z} "
+    r"\left[\rho w_\mathrm{cu} qt_\mathrm{cu} \right]_\mathrm{m}$",
     r"$B_\mathrm{h} = - \nabla_\mathrm{h} \cdot \left[v_\mathrm{cu} qt_\mathrm{cu}\right]_\mathrm{m}$",
 ]
 
@@ -60,7 +62,7 @@ def main():
 
                 try:
                     z = subcube.coord("height_above_reference_ellipsoid")
-                except iris.exceptions.CoordinateNotFoundError:
+                except CoordinateNotFoundError:
                     z = subcube.coord("altitude")
 
                 iplt.plot(

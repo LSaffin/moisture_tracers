@@ -26,6 +26,7 @@ import warnings
 
 import numpy as np
 import iris
+from iris.analysis import AreaWeighted
 from iris.cube import Cube
 
 from irise.diagnostics.contours import haversine
@@ -89,7 +90,7 @@ def main(
         new_grid = translate_grid(grid_x, grid_y, dx, dy)
 
         # Regrid all cubes from the larger forecast grid to the translated small grid
-        regridder = iris.analysis.AreaWeighted()
+        regridder = AreaWeighted()
         newcubes = iris.cube.CubeList()
         for cube in cubes:
             if cube.ndim > 1 and cube.name() not in ["longitude", "latitude"]:

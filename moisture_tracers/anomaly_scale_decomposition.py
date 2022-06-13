@@ -63,7 +63,7 @@ def decompose_scales(cube, coarse_factor=4):
     cube_mesoscale = cube_mesoscale - cube_mean
 
     # Small-scale anomalies
-    # Remaining anomlies not accounted for by mesoscale
+    # Remaining anomalies not accounted for by mesoscale
     cube_small_scale = cube - (cube_mean + cube_mesoscale_full_grid)
 
     return cube_mean, cube_mesoscale, cube_small_scale

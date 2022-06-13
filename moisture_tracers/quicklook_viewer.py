@@ -14,12 +14,12 @@ import parse
 class QuicklookGrid(ttk.Frame):
     """Frame to hold multiple quicklook viewers"""
 
-    def __init__(self, path, lookup, parent, *args, **kwargs):
+    def __init__(self, path, lookup, parent, **kwargs):
         self.path = path
         self.lookup = lookup
         self.parent = parent
 
-        ttk.Frame.__init__(self, parent, *args, **kwargs)
+        ttk.Frame.__init__(self, parent, **kwargs)
         self.grid()
 
         self.bind("<KeyPress>", self.keydown)
@@ -67,11 +67,11 @@ class QuicklookGrid(ttk.Frame):
 
 
 class QuicklookViewer(ttk.Frame):
-    def __init__(self, path, lookup, parent, *args, **kwargs):
+    def __init__(self, path, lookup, parent, **kwargs):
         self.path = path
         self.lookup = lookup
 
-        ttk.Frame.__init__(self, parent, *args, **kwargs)
+        ttk.Frame.__init__(self, parent, **kwargs)
         self.parent = parent
         self.grid(row=0, column=len(self.parent.viewers))
 

@@ -19,8 +19,8 @@ def main():
     fig = plt.figure(figsize=(8, 10))
 
     axes = [
-        plt.subplot2grid([2, 1], [0, 0], projection=ccrs.PlateCarree()),
-        plt.subplot2grid([2, 1], [1, 0]),
+        plt.subplot2grid((2, 1), (0, 0), projection=ccrs.PlateCarree()),
+        plt.subplot2grid((2, 1), (1, 0)),
     ]
 
     tr0 = trajectory.load(
