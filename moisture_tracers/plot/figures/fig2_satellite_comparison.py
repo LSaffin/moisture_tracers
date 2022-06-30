@@ -16,15 +16,13 @@ from moisture_tracers import (
     datadir,
     plotdir,
 )
-from moisture_tracers.plot.figures import labels, projection
+from moisture_tracers.plot.figures import labels, projection, lw_flux_plot_kwargs, satellite_plot_kwargs
 
 satellite_path = datadir + "../../goes/2km_10min/"
 varname = "toa_outgoing_longwave_flux"
-kwargs = dict(vmin=255, vmax=305, cmap="cividis_r")
 cbar_label = "Model longwave flux (W m$^{-2}$)"
 
 varname_sat = "temp_11_0um_nom"
-kwargs_sat = dict(vmin=270, vmax=300, cmap="cmc.nuuk_r")
 cbar_label_sat = r"Satellite 11 $\mu$m brightness temperature (K)"
 
 height_factor = 5
@@ -74,12 +72,12 @@ def make_plot(start_time, grid, resolutions, lead_times):
             cube = cubes.extract_cube(varname)
 
             print(resolution, cube.data.min(), cube.data.max())
-            im1 = iplt.pcolormesh(cube, **kwargs)
+            im1 = iplt.pcolormesh(cube, **lw_flux_plot_kwargs)
 
             # Put the time at the top of each column
             if n == 0:
                 time = forecasts[resolution].current_time
-                plt.title(time.strftime("%H:%M"))
+                plt.title(time.strftime("%HZ"))
 
             # Put the resolution at the left side of each row
             if m == 0:
@@ -111,7 +109,7 @@ def make_plot(start_time, grid, resolutions, lead_times):
         )
         satellite_data = cube.copy(data=satellite_data[varname_sat].values)
         print("satellite", satellite_data.data.min(), satellite_data.data.max())
-        im2 = iplt.pcolormesh(satellite_data, **kwargs_sat)
+        im2 = iplt.pcolormesh(satellite_data, **satellite_plot_kwargs)
 
         # Label the satellite in the leftmost plot
         if m == 0:
@@ -124,12 +122,12 @@ def make_plot(start_time, grid, resolutions, lead_times):
     ax = plt.subplot2grid(
         (nrows, ncols), (0, ncols - 1), rowspan=len(resolutions) * height_factor
     )
-    cbar = plt.colorbar(im1, cax=ax, orientation="vertical")
+    cbar = plt.colorbar(im1, cax=ax, orientation="vertical", extend="both")
     cbar.set_label(cbar_label)
 
     # A horizontal one for the satellite data at the bottom
     ax = plt.subplot2grid((nrows, ncols), (nrows - 1, 0), colspan=ncols - 1)
-    cbar = plt.colorbar(im2, cax=ax, orientation="horizontal")
+    cbar = plt.colorbar(im2, cax=ax, orientation="horizontal", extend="both")
     cbar.set_label(cbar_label_sat)
 
 

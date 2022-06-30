@@ -1,3 +1,4 @@
+import datetime
 from string import ascii_lowercase
 
 import iris
@@ -7,13 +8,12 @@ import matplotlib.pyplot as plt
 import irise
 
 from moisture_tracers import plotdir
-from moisture_tracers.plot.figures import linestyles, labels
+from moisture_tracers.plot.figures import linestyles, labels, date_format
 from moisture_tracers.plot.figures.fig6_aggregation_terms_profile import (
     aggregation_terms_fname,
     titles,
     terms,
 )
-
 
 grid = "lagrangian_grid"
 
@@ -70,17 +70,21 @@ def main():
                 transform=ax.transAxes,
             )
 
-    axes[0, 0].legend()
+    lg = axes[0, 0].legend()
+    for handle in lg.legendHandles:
+        handle.set_color("k")
+    axes[0, 0].xaxis.set_major_formatter(date_format)
+    axes[0, 0].set_xlim(datetime.datetime(2020, 2, 2), datetime.datetime(2020, 2, 3))
     axes[0, 1].legend(ncol=2)
 
-    fig.autofmt_xdate()
     fig.text(
-        0.0,
+        0.025,
         0.5,
         "Rate of change in mesoscale moisture anomaly (kg m$^{-2}$ hour$^{-1}$)",
         rotation="vertical",
         va="center",
     )
+    fig.text(0.5, 0.05, r"Time (2$^\mathrm{nd}$ Feb)", ha="center")
 
     plt.savefig(plotdir + "fig7_aggregation_terms_by_column.png")
 

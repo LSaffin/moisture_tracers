@@ -3,6 +3,7 @@ Show the quasi-Lagrangian domains extracted from a larger domain simulation at
 a set of different lead times and overlay the trajectory
 """
 
+import numpy as np
 import iris.plot as iplt
 import matplotlib.pyplot as plt
 import cmcrameri
@@ -33,7 +34,7 @@ def main():
         cubes = forecast.set_lead_time(hours=lead_time)
         cube = cubes.extract_cube(variable)
 
-        iplt.pcolormesh(cube, vmin=18, vmax=35, cmap="cmc.oslo_r")
+        iplt.pcolormesh(cube, vmin=20, vmax=34, cmap="cmc.oslo_r")
 
         print(lead_time, cube.data.min(), cube.data.max())
 
@@ -44,16 +45,29 @@ def main():
 
         x = cube.coord("grid_longitude").points
         y = cube.coord("grid_latitude").points
-        plt.text(x.min() - 180, y.max(), "T+{}h".format(lead_time))
 
-    cbar = plt.colorbar(orientation="horizontal")
+        if lead_time < 24:
+            day = "1$^\mathrm{st}$"
+        elif lead_time < 48:
+            day = "2$^\mathrm{nd}$"
+        else:
+            day = "3$^\mathrm{rd}$"
+        plt.text(x.min() - 180, y.max()+0.1, "{} {} Feb (T+{}h)".format(forecast.current_time.strftime("%HZ"), day, lead_time))
+
+    cbar = plt.colorbar(orientation="horizontal", extend="both")
     cbar.set_label("Total column water (kg m$^{-2}$)")
 
     plt.plot(tr[0].x - 180, tr[0].y, "--k", alpha=0.75)
 
     ax = plt.gca()
-    ax.gridlines()
+    gl = ax.gridlines()
+    gl.ylabels_left = True
+    for xc in np.arange(45, 61, 5):
+        ax.text(180 - xc, 10.75, r"{}$\degree$W".format(xc), ha="center", va="top")
     ax.coastlines()
+
+    ax.set_ylim(11, 19)
+    ax.set_xlim(180-62, 180-44)
     eurec4a.add_halo_circle(ax, alpha=0.75, lw=3)
 
     plt.savefig(plotdir + "fig3_lagrangian_domain_example_1p1km.png")

@@ -7,28 +7,27 @@ import matplotlib.pyplot as plt
 from dateutil.parser import parse as dateparse
 
 from moisture_tracers import satellite_on_grid, datadir, plotdir
-from moisture_tracers.plot.figures import projection
+from moisture_tracers.plot.figures import projection, labels, satellite_plot_kwargs
 
 forecast_path = datadir + "simulated_satellite/february2/Baseline/"
-forecast_filename = "UMRA3p3_MOapp_{}Z_*scale_2D_Hourly_{}_Baseline_goes16_refl.nc"
+forecast_filename = "UMRA3p3_MOapp_{}Z_*scale_2D_Hourly_{}_Baseline_goes16_brt.nc"
 satellite_path = datadir + "../../goes/2km_10min/"
 resolutions = ["150m", "300m", "500m", "1p1km", "2p2km", "4p4km"]
 
-sat_varname = "refl_0_65um_nom"  # "temp_11_0um_nom"
-kwargs = dict(vmin=0, vmax=1, cmap="cmc.nuuk")
+sat_varname = "temp_11_0um_nom"
 
 lead_times = [35, 38, 42, 45]
 
-height_factor = 10
+height_factor = 5
 nrows = height_factor * (len(resolutions) + 1) + 2
 ncols = len(lead_times)
 
 
 def main():
     start_time = "20200201"
-    grid = "lagrangian_grid"
+    grid = "coarse_grid"
 
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(8, nrows / 3))
     make_plot(start_time, grid)
 
     plt.savefig(
@@ -39,26 +38,15 @@ def main():
 def make_plot(start_time, grid):
     t0 = dateparse(start_time)
 
-    if grid == "coarse_grid":
-        grid_cube, lons, lats = satellite_on_grid.get_grid(
-            datadir + "regridded/20200201T0000_D100m_150m_T+01_coarse_grid.nc"
-        )
+    grid_cube, lons, lats = satellite_on_grid.get_grid(
+        datadir + "regridded_vn12/20200201T0000_km1p1_T+48_lagrangian_grid.nc"
+    )
 
     for m, lead_time in enumerate(lead_times):
         time = t0 + datetime.timedelta(hours=lead_time)
         print(time)
 
         time_cs = iris.Constraint(time=lambda x: x.point == time)
-
-        if grid == "lagrangian_grid":
-            filename = (
-                datadir
-                + "regridded_vn12/{}_km1p1_T+{}_lagrangian_grid.nc".format(
-                    t0.strftime("%Y%m%dT%H%M"),
-                    lead_time,
-                )
-            )
-            grid_cube, lons, lats = satellite_on_grid.get_grid(filename)
 
         for n, resolution in enumerate(resolutions):
             plt.subplot2grid(
@@ -77,18 +65,13 @@ def make_plot(start_time, grid):
                 time_cs,
             )
 
-            if grid == "lagrangian_grid":
-                cs = grid_cube.coord("grid_longitude").coord_system
+            for coord in ["grid_longitude", "grid_latitude"]:
+                cube.coord(coord).guess_bounds()
+                cube.coord(coord).coord_system = grid_cube.coord(coord).coord_system
 
-                for coord_name in ["grid_longitude", "grid_latitude"]:
-                    coord = cube.coord(coord_name)
-                    coord.coord_system = cs
-                    coord.guess_bounds()
-
-                cube = cube.regrid(grid_cube, AreaWeighted())
-
+            cube = cube.regrid(grid_cube, AreaWeighted())
             print(resolution, cube.data.min(), cube.data.max())
-            iplt.pcolormesh(cube, **kwargs)
+            iplt.pcolormesh(cube, **satellite_plot_kwargs)
 
             if n == 0:
                 plt.title(time.strftime("%H:%M"))
@@ -97,7 +80,7 @@ def make_plot(start_time, grid):
                 ax = plt.gca()
                 ax.get_yaxis().set_visible(True)
                 ax.set_yticks([])
-                ax.set_ylabel(resolution)
+                ax.set_ylabel(labels[resolution])
 
         # GOES
         ax = plt.subplot2grid(
@@ -114,9 +97,9 @@ def make_plot(start_time, grid):
             lats,
             sat_varname,
         )
-        satellite_data = cube.copy(data=satellite_data[sat_varname].values) / 100
+        satellite_data = grid_cube.copy(data=satellite_data[sat_varname].values)
         print("satellite", satellite_data.data.min(), satellite_data.data.max())
-        im = iplt.pcolormesh(satellite_data, **kwargs)
+        im = iplt.pcolormesh(satellite_data, **satellite_plot_kwargs)
 
         if m == 0:
             ax.get_yaxis().set_visible(True)
@@ -125,7 +108,7 @@ def make_plot(start_time, grid):
 
     ax = plt.subplot2grid((nrows, ncols), (nrows - 1, 0), colspan=ncols)
     cbar = plt.colorbar(im, cax=ax, extend="both", orientation="horizontal")
-    cbar.set_label(r"Reflectivity at 650 nm")
+    cbar.set_label(r"11 $\mu$m brightness temperature (K)")
 
 
 if __name__ == "__main__":

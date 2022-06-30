@@ -22,7 +22,7 @@ def main():
     cube_500m = cube_500m.extract_cube(variable)
 
     cube_1km = irise.load(
-        datadir + "km1p1/model-diagnostics_20200201T0000_T+35.nc", variable
+        datadir + "km1p1/model-diagnostics_20200201T0000_T+35.nc",
     )
     cube_1km = cube_1km.extract_cube(variable)
 
@@ -44,8 +44,11 @@ def main():
 
     ax = plt.gca()
     ax.coastlines()
-    ax.gridlines()
-    plt.title("Total Column Water Feb 02 12:00\n500m and 1.1km T+36h")
+    gl = ax.gridlines()
+    gl.ylabels_left = True
+    for xc in range(40, 70, 5):
+        plt.text(180 - xc, -0.5, r"{}$\degree$W".format(xc), ha="center", va="top")
+    plt.title("Total Column Water (500m and 1.1km)\n" r"12Z 2$^\mathrm{nd}$ Feb (T+36h)")
 
     plt.savefig(plotdir + "fig1_domain_overview.png")
 

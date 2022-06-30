@@ -49,6 +49,10 @@ def main():
             print(variable, cube[0].data.min(), cube[0].data.max())
 
             im = iplt.pcolormesh(cube[0], **kwargs[n])
+            cloud = irise.convert.calc("mass_fraction_of_cloud_liquid_water_in_air", cubes, levels=("height_above_reference_ellipsoid", [2000]))
+            iplt.contour(cloud[0], [1e-5], colors="green", linewidths=2)
+            iplt.contour(cloud[0], [1e-5], colors="white", linewidths=0.5)
+
             ax = plt.gca()
             ax.gridlines()
             ax.coastlines()
@@ -61,7 +65,12 @@ def main():
             )
 
             if n == 0:
-                ax.set_title(forecast.current_time.strftime("%H:%M"))
+                if lead_time < 48:
+                    day = r" $2^\mathrm{nd}$ Feb"
+                else:
+                    day = r" $3^\mathrm{rd}$ Feb"
+
+                ax.set_title(forecast.current_time.strftime("%HZ") + day)
 
         ax = plt.subplot2grid(
             (nrows, ncols),
@@ -70,7 +79,7 @@ def main():
         cbar = plt.colorbar(im, cax=ax, extend="both", orientation="vertical")
         cbar.set_label(labels[n])
 
-    plt.savefig(plotdir + "figC1_cold_pools.png")
+    plt.savefig(plotdir + "fig11_cold_pools.png")
 
 
 if __name__ == "__main__":

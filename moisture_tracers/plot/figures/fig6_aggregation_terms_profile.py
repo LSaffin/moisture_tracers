@@ -11,13 +11,12 @@ from moisture_tracers.plot.figures import linestyles, labels
 
 
 titles = [
-    r"$C = -w_\mathrm{m} \frac{\partial \bar{q}}{\partial z}$",
-    r"$A = -(\bar{\mathbf{u}} + \mathbf{u}_\mathrm{m}) \cdot \nabla qt_\mathrm{m}$",
-    r"$A_\mathrm{v} = -(\bar{w} + w_\mathrm{m}) \frac{\partial qt_\mathrm{m}}{\partial z}$",
-    r"$A_\mathrm{h} = -(\bar{\mathbf{v}} + \mathbf{v}_\mathrm{m}) \cdot \nabla_\mathrm{h} qt_\mathrm{m}$",
-    r"$B_\mathrm{v} = \frac{1}{\rho} \frac{\partial}{\partial z} "
-    r"\left[\rho w_\mathrm{cu} qt_\mathrm{cu} \right]_\mathrm{m}$",
-    r"$B_\mathrm{h} = - \nabla_\mathrm{h} \cdot \left[v_\mathrm{cu} qt_\mathrm{cu}\right]_\mathrm{m}$",
+    r"$C = -w^{\prime\prime} \frac{\partial \overline{q_\mathrm{t}}}{\partial z}$",
+    r"$A = -(\overline{\mathbf{u}} + \mathbf{u}^{\prime\prime}) \cdot \nabla q_\mathrm{t}^{\prime\prime}$",
+    r"$A_\mathrm{v} = -(\overline{w} + w^{\prime\prime}) \frac{\partial q_\mathrm{t}^{\prime\prime}}{\partial z}$",
+    r"$A_\mathrm{h} = -(\overline{\mathbf{v}} + \mathbf{v}^{\prime\prime}) \cdot \nabla_\mathrm{h} q_\mathrm{t}^{\prime\prime}$",
+    r"$B_\mathrm{v} = \frac{1}{\rho} \frac{\partial}{\partial z}\left[\rho w^{\prime\prime\prime} q_\mathrm{t}^{\prime\prime\prime} \right]_\mathrm{m}$",
+    r"$B_\mathrm{h} = - \nabla_\mathrm{h} \cdot \left[\mathbf{v}^{\prime\prime\prime} q_\mathrm{t}^{\prime\prime\prime}\right]_\mathrm{m}$",
 ]
 
 terms = [
@@ -67,7 +66,7 @@ def main():
 
                 iplt.plot(
                     subcube,
-                    z,
+                    z / 1e3,
                     color="C{}".format(p),
                     linestyle=linestyles[resolution],
                     label=label,
@@ -84,14 +83,16 @@ def main():
                 transform=ax.transAxes,
             )
 
-    axes[0, 0].set_ylim(0, 3000)
-    axes[0, 0].legend()
+    axes[0, 0].set_ylim(0, 3)
+    lg = axes[0, 0].legend()
+    for handle in lg.legendHandles:
+        handle.set_color("k")
     axes[0, 1].legend()
 
     fig.text(
         0.5, 0.0, "Rate of change in mesoscale moisture anomaly (s$^{-1}$)", ha="center"
     )
-    fig.text(0.0, 0.5, "Altitude (m)", rotation="vertical", va="center")
+    fig.text(0.0, 0.5, "Altitude (km)", rotation="vertical", va="center")
 
     plt.savefig(plotdir + "fig6_aggregation_terms_profile_t+34.png")
 

@@ -1,14 +1,17 @@
+import datetime
+
 import iris
 import iris.plot as iplt
 import matplotlib.pyplot as plt
 
 from moisture_tracers import datadir, plotdir
-from moisture_tracers.plot.figures import linestyles, alphas, labels
+from moisture_tracers.plot.figures import linestyles, alphas, labels, date_format
 
 aggregation_terms_fname = "diagnostics_vn12/aggregation_terms_by_quartile_{}_{}_{}.nc"
 resolutions = dict(
     coarse_grid=["km1p1", "km2p2", "km4p4", "D100m_300m", "D100m_500m"],
     lagrangian_grid=["km1p1", "km2p2", "km4p4"],
+    lagrangian_grid_no_evap=["km1p1", "km2p2", "km4p4"],
 )
 
 variable = "total_column_water"
@@ -22,7 +25,6 @@ def main():
         axes,
         "coarse_grid",
         start_time,
-        linestyle_fig="-",
         color_fig="k",
         alpha_fig=0.25,
     )
@@ -94,12 +96,13 @@ def figure_formatting(fig, axes):
     )
 
     axes[1].legend()
-    axes[1].set_ylabel("TCW$_{q4}$ - TCW$_{q1}$")
+    axes[1].xaxis.set_major_formatter(date_format)
+    axes[1].set_xlim(datetime.datetime(2020, 2, 2), datetime.datetime(2020, 2, 3))
+    axes[1].set_xlabel(r"Time (2$^\mathrm{nd}$ Feb)")
+    axes[1].set_ylabel(r"TCW$_\mathrm{q4}$ - TCW$_\mathrm{q1}$")
     axes[1].text(
         -0.05, 1.05, "(b)", dict(fontsize="large"), transform=axes[1].transAxes
     )
-
-    fig.autofmt_xdate()
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import irise
 
 from moisture_tracers import datadir, plotdir
-from moisture_tracers.plot.figures import linestyles
+from moisture_tracers.plot.figures import linestyles, date_format
 
 z_name = "altitude"
 
@@ -23,13 +23,21 @@ def main():
         "stratiform_rainfall_amount",
     ]
 
+    titles = [
+        "Specific humidity",
+        "Passive tracer",
+        "Surface fluxes",
+        "Rain",
+    ]
+
     times = iris.Constraint(
         time=lambda cell: datetime.datetime(2020, 2, 2)
         <= cell.point
         <= datetime.datetime(2020, 2, 3)
     )
 
-    for n, resolution in enumerate(["km1p1", "km2p2", "km4p4"]):
+    qsum = {quartile: [] for quartile in range(1, 5)}
+    for n, resolution in enumerate(["km1p1"]):
         print(resolution)
         fig, axes = plt.subplots(2, 2, sharex="all", sharey="all", figsize=(8, 5))
 
@@ -71,7 +79,7 @@ def main():
                     label=label,
                     linestyle=linestyles[resolution],
                 )
-                ax.set_title(term)
+            ax.set_title(titles[m])
 
             ax.text(
                 -0.05,
@@ -87,15 +95,15 @@ def main():
         axes[0, 0].set_xlim(
             datetime.datetime(2020, 2, 2), datetime.datetime(2020, 2, 3)
         )
-
+        axes[0, 0].xaxis.set_major_formatter(date_format)
+        fig.text(0.5, 0.0, r"Time (2$^\mathrm{nd}$ Feb)", ha="center")
         fig.text(
-            0.0,
+            0.025,
             0.5,
             "Change in total column water (kg m$^{-2}$ hour$^{-1}$)",
             rotation="vertical",
             va="center",
         )
-        fig.autofmt_xdate()
 
         plt.savefig(
             plotdir + "fig8_moisture_tracer_aggregation_{}.png".format(resolution)
