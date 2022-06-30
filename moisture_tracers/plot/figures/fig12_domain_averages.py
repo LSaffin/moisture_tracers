@@ -21,7 +21,7 @@ diagnostics = [
         "Total Column Liquid Water (kg m$^{-2}$)",
     ),
     ("stratiform_rainfall_amount", "Hourly Rainfall Amount (kg m$^{-2}$)"),
-    #("atmosphere_boundary_layer_thickness", "Boundary Layer Depth (m)"),
+    # ("atmosphere_boundary_layer_thickness", "Boundary Layer Depth (m)"),
     ("toa_outgoing_longwave_flux", "Outgoing Longwave Flux (W m$^{-2}$)"),
     ("toa_outgoing_shortwave_flux", "Outgoing Shortwave Flux (W m$^{-2}$)"),
 ]
@@ -36,15 +36,19 @@ def main():
     fig, axes = plt.subplots(3, 2, figsize=(8, 10), sharex="all")
 
     for n, resolution in enumerate(resolutions):
-        for m, (start_time, grid) in enumerate([
-            ("0201", "lagrangian_grid"),
-            ("0202", "lagrangian_grid"),
-            ("0201", "lagrangian_grid_no_evap")
-        ]):
+        for m, (start_time, grid) in enumerate(
+            [
+                ("0201", "lagrangian_grid"),
+                ("0202", "lagrangian_grid"),
+                ("0201", "lagrangian_grid_no_evap"),
+            ]
+        ):
             cubes = iris.load(
                 datadir
                 + "diagnostics_vn12/domain_averages_2020{}_{}_{}.nc".format(
-                    start_time, resolution, grid,
+                    start_time,
+                    resolution,
+                    grid,
                 )
             )
 
@@ -76,7 +80,11 @@ def main():
                 if cube.ndim == 2:
                     # Average wind from 0-2km
                     z_name = "height_above_reference_ellipsoid"
-                    cube = cube.extract(iris.Constraint(height_above_reference_ellipsoid=lambda x: x < 2000))
+                    cube = cube.extract(
+                        iris.Constraint(
+                            height_above_reference_ellipsoid=lambda x: x < 2000
+                        )
+                    )
                     dz = irise.grid.thickness(cube[0], z_name=z_name)
                     cube = cube.collapsed([z_name], MEAN, weights=dz.data)
                 iplt.plot(

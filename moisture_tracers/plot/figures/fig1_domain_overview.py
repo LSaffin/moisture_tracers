@@ -48,7 +48,9 @@ def main():
     gl.ylabels_left = True
     for xc in range(40, 70, 5):
         plt.text(180 - xc, -0.5, r"{}$\degree$W".format(xc), ha="center", va="top")
-    plt.title("Total Column Water (500m and 1.1km)\n" r"12Z 2$^\mathrm{nd}$ Feb (T+36h)")
+    plt.title(
+        "Total Column Water (500m and 1.1km)\n" r"12Z 2$^\mathrm{nd}$ Feb (T+36h)"
+    )
 
     plt.savefig(plotdir + "fig1_domain_overview.png")
 

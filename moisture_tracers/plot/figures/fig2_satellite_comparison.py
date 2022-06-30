@@ -16,7 +16,12 @@ from moisture_tracers import (
     datadir,
     plotdir,
 )
-from moisture_tracers.plot.figures import labels, projection, lw_flux_plot_kwargs, satellite_plot_kwargs
+from moisture_tracers.plot.figures import (
+    labels,
+    projection,
+    lw_flux_plot_kwargs,
+    satellite_plot_kwargs,
+)
 
 satellite_path = datadir + "../../goes/2km_10min/"
 varname = "toa_outgoing_longwave_flux"

@@ -41,7 +41,7 @@ def main():
             1.05,
             "({})".format(ascii_lowercase[n]),
             dict(fontsize="large"),
-            transform=axes[n // 2, n % 2].transAxes
+            transform=axes[n // 2, n % 2].transAxes,
         )
 
     plt.savefig(plotdir + "fig10_moisture_quartiles_sensitivities.png")

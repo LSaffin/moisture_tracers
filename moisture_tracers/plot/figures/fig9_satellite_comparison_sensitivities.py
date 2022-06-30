@@ -88,9 +88,7 @@ def make_plot(start_time, grid, resolutions, lead_times):
 
     # Add colourbars
     # A vertical one for the model data spanning the model data rows
-    ax = plt.subplot2grid(
-        (nrows, ncols), (0, ncols - 1), rowspan=nrows
-    )
+    ax = plt.subplot2grid((nrows, ncols), (0, ncols - 1), rowspan=nrows)
     cbar = plt.colorbar(im1, cax=ax, orientation="vertical", extend="both")
     cbar.set_label(cbar_label)
 

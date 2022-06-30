@@ -49,7 +49,11 @@ def main():
             print(variable, cube[0].data.min(), cube[0].data.max())
 
             im = iplt.pcolormesh(cube[0], **kwargs[n])
-            cloud = irise.convert.calc("mass_fraction_of_cloud_liquid_water_in_air", cubes, levels=("height_above_reference_ellipsoid", [2000]))
+            cloud = irise.convert.calc(
+                "mass_fraction_of_cloud_liquid_water_in_air",
+                cubes,
+                levels=("height_above_reference_ellipsoid", [2000]),
+            )
             iplt.contour(cloud[0], [1e-5], colors="green", linewidths=2)
             iplt.contour(cloud[0], [1e-5], colors="white", linewidths=0.5)
 

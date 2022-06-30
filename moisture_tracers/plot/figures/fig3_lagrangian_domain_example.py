@@ -52,7 +52,13 @@ def main():
             day = "2$^\mathrm{nd}$"
         else:
             day = "3$^\mathrm{rd}$"
-        plt.text(x.min() - 180, y.max()+0.1, "{} {} Feb (T+{}h)".format(forecast.current_time.strftime("%HZ"), day, lead_time))
+        plt.text(
+            x.min() - 180,
+            y.max() + 0.1,
+            "{} {} Feb (T+{}h)".format(
+                forecast.current_time.strftime("%HZ"), day, lead_time
+            ),
+        )
 
     cbar = plt.colorbar(orientation="horizontal", extend="both")
     cbar.set_label("Total column water (kg m$^{-2}$)")
@@ -67,7 +73,7 @@ def main():
     ax.coastlines()
 
     ax.set_ylim(11, 19)
-    ax.set_xlim(180-62, 180-44)
+    ax.set_xlim(180 - 62, 180 - 44)
     eurec4a.add_halo_circle(ax, alpha=0.75, lw=3)
 
     plt.savefig(plotdir + "fig3_lagrangian_domain_example_1p1km.png")

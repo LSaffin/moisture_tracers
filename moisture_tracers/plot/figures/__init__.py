@@ -2,7 +2,7 @@ import cartopy.crs as ccrs
 import matplotlib.dates as mdates
 
 
-date_format = mdates.DateFormatter('%HZ')
+date_format = mdates.DateFormatter("%HZ")
 
 linestyles = dict(
     km1p1="-", km2p2="--", km4p4="-.", D100m_150m="-", D100m_300m="--", D100m_500m="-."

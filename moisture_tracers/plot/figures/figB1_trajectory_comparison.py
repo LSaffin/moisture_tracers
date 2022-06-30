@@ -10,7 +10,11 @@ from moisture_tracers import datadir, plotdir
 from moisture_tracers.plot.figures import linestyles, date_format
 
 from matplotlib.lines import Line2D
-custom_lines = [Line2D([0], [0], color="k", linestyle=linestyles[linestyle]) for linestyle in linestyles]
+
+custom_lines = [
+    Line2D([0], [0], color="k", linestyle=linestyles[linestyle])
+    for linestyle in linestyles
+]
 
 resolutions = ["km1p1", "km2p2", "km4p4"]
 simulations = [
