@@ -118,6 +118,55 @@ def generate_1km_grid(cube_500m, coarse_factor=2):
     return cube_1km_grid
 
 
+def generate_large_scale_grid(cube):
+    """
+    Generate a 3x3 grid that uses the input cube domain as the inner grid point and a
+    2x2 grid that is at the 1/2 points in the 3x3 grid
+    """
+    lon, lon_offset = generate_large_scale_coord(cube.coord("grid_longitude"))
+    lat, lat_offset = generate_large_scale_coord(cube.coord("grid_latitude"))
+
+    cube_large_scale = iris.cube.Cube(
+        data=np.zeros([len(lat.points), len(lon.points)]),
+        dim_coords_and_dims=[(lat, 0), (lon, 1)],
+    )
+
+    cube_large_scale_offset = iris.cube.Cube(
+        data=np.zeros([len(lat.points), len(lon.points)]),
+        dim_coords_and_dims=[(lat, 0), (lon, 1)],
+    )
+
+    return cube_large_scale, cube_large_scale_offset
+
+
+def generate_large_scale_coord(coord):
+    coord_centre = coord.points.mean()
+    coord_spacing = coord.points.max() - coord.points.min()
+
+    coord_out = DimCoord(
+        [coord_centre - coord_spacing, coord_centre, coord_centre + coord_spacing],
+        standard_name=coord.standard_name,
+        units=coord.units,
+        attributes=coord.attributes,
+        coord_system=coord.coord_system,
+        circular=coord.circular,
+    )
+
+    coord_out_offset = DimCoord(
+        [coord.points.min(), coord.points.max()],
+        standard_name=coord.standard_name,
+        units=coord.units,
+        attributes=coord.attributes,
+        coord_system=coord.coord_system,
+        circular=coord.circular,
+    )
+
+    coord_out.guess_bounds()
+    coord_out_offset.guess_bounds()
+
+    return coord_out, coord_out_offset
+
+
 def chop_coord(points, coarse_factor):
     offset = len(points) % coarse_factor
     if offset > 0:
