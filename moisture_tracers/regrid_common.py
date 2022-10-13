@@ -132,7 +132,7 @@ def generate_large_scale_grid(cube):
     )
 
     cube_large_scale_offset = iris.cube.Cube(
-        data=np.zeros([len(lat.points), len(lon.points)]),
+        data=np.zeros([len(lat_offset.points), len(lon_offset.points)]),
         dim_coords_and_dims=[(lat, 0), (lon, 1)],
     )
 
