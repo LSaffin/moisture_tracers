@@ -2,6 +2,8 @@
 """
 
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.ndimage import generic_filter
 import iris.quickplot as qplt
 from iris.analysis import MEAN, AreaWeighted, Nearest
 
@@ -45,28 +47,38 @@ def main():
     plt.show()
 
 
-def decompose_scales(cube, coarse_factor=4):
+def decompose_scales(cube, coarse_factor=4, large_scale_factor=None):
     coarse_grid = generate_1km_grid(cube, coarse_factor=coarse_factor)
 
-    # Large-scale mean
-    cube_mean = cube.collapsed(["grid_longitude", "grid_latitude"], MEAN)
-
-    # Mesoscale anomalies
     # Average the full field to the mesoscale
     cube_mesoscale = cube.regrid(coarse_grid, AreaWeighted())
     # TODO: Only use the full grid that is used in the coarse graining
     # i.e. chop off ends that aren't divisible by coarse-graining factor
     pass
-    # Regrid to the full grid
-    cube_mesoscale_full_grid = cube_mesoscale.regrid(cube, Nearest())
-    # Subtract mean to get mesoscale anomalies
-    cube_mesoscale = cube_mesoscale - cube_mean
 
     # Small-scale anomalies
-    # Remaining anomalies not accounted for by mesoscale
-    cube_small_scale = cube - (cube_mean + cube_mesoscale_full_grid)
+    cube_mesoscale_full_grid = cube_mesoscale.regrid(cube, Nearest())
+    cube_small_scale = cube - cube_mesoscale_full_grid
 
-    return cube_mean, cube_mesoscale, cube_small_scale
+    if large_scale_factor is None:
+        # Large Scale is domain mean
+        cube_large_scale = cube.collapsed(["grid_longitude", "grid_latitude"], MEAN)
+    else:
+        # Large scale is median filtered field
+        filter_large = np.ones(cube.ndim, dtype=int)
+        for coord in ["grid_longitude", "grid_latitude"]:
+            n = cube.coord_dims(coord)
+            filter_large[n] = large_scale_factor
+
+        large_scale = generic_filter(
+            cube_mesoscale.data, function=np.median, size=filter_large
+        )
+        cube_large_scale = cube_mesoscale.copy(data=large_scale)
+
+    # Subtract large scale to get mesoscale anomalies
+    cube_mesoscale = cube_mesoscale - cube_large_scale
+
+    return cube_large_scale, cube_mesoscale, cube_small_scale
 
 
 if __name__ == "__main__":
