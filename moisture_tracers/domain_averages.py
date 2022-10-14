@@ -16,6 +16,7 @@ Options:
     -h --help
         Show this screen.
 """
+import datetime
 
 import iris
 from iris.analysis import MEAN, RMS
@@ -52,6 +53,15 @@ def generate(forecast):
 
     for n, cubes in enumerate(forecast):
         print(forecast.lead_time)
+        rad = cubes.extract(iris.Constraint(
+            time=lambda x: x.point.second != 0 and
+                           x.point.hour == (forecast.current_time - datetime.timedelta(hours=1)).hour)
+        )
+        cubes = cubes.extract(iris.Constraint(time=lambda x: x.point == forecast.current_time))
+
+        for cube in rad:
+            cubes.append(cube)
+
         if n == 0:
             example_cube = cubes.extract_cube("air_pressure")
             weights = {2: area_weights(example_cube[0]), 3: area_weights(example_cube)}
@@ -77,4 +87,7 @@ def generate(forecast):
 
 
 if __name__ == "__main__":
+    import warnings
+    warnings.filterwarnings("ignore")
+
     parse_docopt_arguments(main, __doc__)
