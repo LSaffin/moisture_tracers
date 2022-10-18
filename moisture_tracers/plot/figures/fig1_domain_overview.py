@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import cmcrameri
 
 import irise
+from twinotter.external import eurec4a
 
 from moisture_tracers import datadir, plotdir
 
@@ -43,6 +44,7 @@ def main():
     )
 
     ax = plt.gca()
+    eurec4a.add_halo_circle(ax, alpha=0.75, lw=1)
     ax.coastlines()
     gl = ax.gridlines()
     gl.ylabels_left = True
