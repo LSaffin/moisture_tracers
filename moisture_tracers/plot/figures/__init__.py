@@ -1,3 +1,4 @@
+import numpy as np
 import cartopy.crs as ccrs
 import matplotlib.dates as mdates
 
@@ -27,5 +28,5 @@ labels["4p4km"] = "4.4 km"
 
 projection = ccrs.PlateCarree()
 
-lw_flux_plot_kwargs = dict(vmin=260, vmax=300, cmap="cividis_r")
+lw_flux_plot_kwargs = dict(vmin=260, vmax=300, cmap="cmc.grayC")
 satellite_plot_kwargs = dict(vmin=280, vmax=300, cmap="cmc.nuuk_r")
