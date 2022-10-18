@@ -7,6 +7,7 @@ __version__ = "0.1.0"
 
 import datetime
 
+import iris.exceptions
 from dateutil.parser import parse as dateparse
 
 from irise.interpolate import remap_3d
@@ -93,9 +94,18 @@ def specific_fixes(cubes):
     regridded = []
     example_cube = cubes.extract_cube("upward_air_velocity")
     z = example_cube.coord("atmosphere_hybrid_height_coordinate")
+    example_cube.coord("height_above_reference_ellipsoid").rename("altitude")
     for cube in cubes:
+        try:
+            cube.coord("atmosphere_hybrid_height_coordinate").units = "m"
+        except iris.exceptions.CoordinateNotFoundError:
+            pass
+
         if cube.ndim == 3:
-            cube.coord("height_above_reference_ellipsoid").rename("altitude")
+            try:
+                cube.coord("height_above_reference_ellipsoid").rename("altitude")
+            except iris.exceptions.CoordinateNotFoundError:
+                pass
 
             if cube.coord("atmosphere_hybrid_height_coordinate") != z:
                 regridded.append(remap_3d(cube, example_cube))
