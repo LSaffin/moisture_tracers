@@ -74,7 +74,7 @@ def make_plot(start_time, grid):
             iplt.pcolormesh(cube, **satellite_plot_kwargs)
 
             if n == 0:
-                plt.title(time.strftime("%H:%M"))
+                plt.title(time.strftime("%HZ"))
 
             if m == 0:
                 ax = plt.gca()
