@@ -6,7 +6,7 @@ from irise.diagnostics.contours import haversine
 from pylagranto import trajectory
 from twinotter.external.eurec4a import add_halo_circle
 
-from moisture_tracers import datadir, plotdir
+from moisture_tracers import datadir, plotdir, grey_zone_forecast
 from moisture_tracers.plot.figures import linestyles, date_format
 
 from matplotlib.lines import Line2D
@@ -21,9 +21,10 @@ simulations = [
     ("20200201", ""),
     ("20200202", ""),
     ("20200201", "_no_evap"),
+    ("20200201", "_Ron_Brown"),
 ]
 
-labels = ["Default", "Late start", "No evap"]
+labels = ["Default", "Late start", "No evap", "RHB"]
 
 
 def main():
@@ -57,13 +58,22 @@ def main():
                 label = None
 
             plt.axes(axes[0])
-            plt.plot(
-                tr.x[:24] - 360,
-                tr.y[:24],
-                linestyle=linestyle,
-                color=color,
-                label=label,
-            )
+            if grid == "_Ron_Brown":
+                plt.plot(
+                    tr.x[24:] - 360,
+                    tr.y[24:],
+                    linestyle=linestyle,
+                    color=color,
+                    label=label,
+                )
+            else:
+                plt.plot(
+                    tr.x[:24] - 360,
+                    tr.y[:24],
+                    linestyle=linestyle,
+                    color=color,
+                    label=label,
+                )
 
             plt.axes(axes[1])
             if start_time != "20200201" or grid != "" or resolution != "km1p1":
@@ -75,14 +85,8 @@ def main():
                 )
 
     # Plot the boundary of the hectometre-scale domain
-    cube = irise.load(datadir + "D100m_500m/model-diagnostics_20200201T0000_T+35.nc")
-    cube = cube.extract_cube("total_column_water")
-    x = cube.coord("grid_longitude").points - 360
-    y = cube.coord("grid_latitude").points
-
-    axes[0].plot(
-        [x[0], x[-1], x[-1], x[0], x[0]], [y[0], y[0], y[-1], y[-1], y[0]], color="r"
-    )
+    add_domain_box(axes[0], "20200201", "km1p1", "lagrangian_grid", color="k")
+    add_domain_box(axes[0], "20200201", "km1p1", "lagrangian_grid_Ron_Brown", color="r")
 
     leg1 = axes[0].legend(loc="lower right")
     axes[0].legend(custom_lines, ["1.1 km", "2.2 km", "4.4 km"], loc=(0.62, 0.03))
@@ -103,6 +107,23 @@ def main():
     )
 
     plt.savefig(plotdir + "figB1_trajectory_comparison.png")
+
+
+def add_domain_box(ax, start_time, resolution, grid, **kwargs):
+    forecast = grey_zone_forecast(
+        datadir + "regridded_vn12/",
+        start_time=start_time,
+        resolution=resolution,
+        grid=grid
+    )
+    cubes = forecast.set_lead_time(hours=48)
+    cube = cubes.extract_cube("total_column_water")
+    x = cube.coord("grid_longitude").points - 360
+    y = cube.coord("grid_latitude").points
+
+    ax.plot(
+        [x[0], x[-1], x[-1], x[0], x[0]], [y[0], y[0], y[-1], y[-1], y[0]], **kwargs
+    )
 
 
 if __name__ == "__main__":
