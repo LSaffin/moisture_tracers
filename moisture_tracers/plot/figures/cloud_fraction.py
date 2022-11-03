@@ -32,9 +32,11 @@ def make_plot():
         1111
         ....
         ....
+        ....
         ccdd
         ccdd
         ccdd
+        ....
         ....
         eeff
         eeff
@@ -55,8 +57,7 @@ def make_plot():
 
     ref.coord("height_above_reference_ellipsoid").convert_units("km")
     im = make_row(
-        ref, "20200201", ["D100m_300m", "D100m_500m", "km2p2", "km4p4"],
-        "coarse_grid", ax_dict, "cdef"
+        ref, "20200201", ["D100m_300m", "D100m_500m"], "coarse_grid", ax_dict, "cdef"
     )
 
     plt.axes(ax_dict["a"])
@@ -71,6 +72,7 @@ def make_plot():
     ref = iris.load_cube(
         fname.format("20200201", "km1p1", "lagrangian_grid"), name_cs & time_cs
     )
+    im = make_row(ref, "20200201", ["km2p2", "km4p4"], "lagrangian_grid", ax_dict, "ef")
     im = make_row(ref, "20200202", ["km1p1"], "lagrangian_grid", ax_dict, ["g"])
     im = make_row(ref, "20200201", ["km1p1"], "lagrangian_grid_no_evap", ax_dict, ["h"])
 
@@ -94,9 +96,17 @@ def make_plot():
         ax.set_xticks(ticks)
         ax.set_xticklabels(["" for tick in ticks])
 
-    fig.suptitle("Cloud Fraction\nRelative to 1.1km simulation")
+    fig.suptitle("Cloud Fraction")
+    fig.text(0.5, 0.63, "Difference relative to 1.1 km simulation (inner domain)", ha="center", fontsize="large")
+    fig.text(0.5, 0.455, "Difference relative to 1.1 km simulation (Lagrangian grid)", ha="center", fontsize="large")
     ax_dict["a"].set_ylabel("Height (km)")
+    ax_dict["c"].set_ylabel("Height (km)")
     ax_dict["e"].set_ylabel("Height (km)")
+    ax_dict["g"].set_ylabel("Height (km)")
+
+    for letter in "abcdefgh":
+        ax_dict[letter].set_ylim(0, 3)
+        ax_dict[letter].set_yticks([0, 1, 2, 3])
 
     cax = ax_dict["2"]
     cbar = fig.colorbar(im, cax=cax, orientation="horizontal")
