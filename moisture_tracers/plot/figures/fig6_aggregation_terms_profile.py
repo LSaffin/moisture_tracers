@@ -13,8 +13,6 @@ from moisture_tracers.plot.figures import linestyles, labels
 titles = [
     r"$C = -w^{\prime\prime} \frac{\partial \overline{q_\mathrm{t}}}{\partial z}$",
     r"$A = -(\overline{\mathbf{u}} + \mathbf{u}^{\prime\prime}) \cdot \nabla q_\mathrm{t}^{\prime\prime}$",
-    r"$A_\mathrm{v} = -(\overline{w} + w^{\prime\prime}) \frac{\partial q_\mathrm{t}^{\prime\prime}}{\partial z}$",
-    r"$A_\mathrm{h} = -(\overline{\mathbf{v}} + \mathbf{v}^{\prime\prime}) \cdot \nabla_\mathrm{h} q_\mathrm{t}^{\prime\prime}$",
     r"$B_\mathrm{v} = \frac{1}{\rho} \frac{\partial}{\partial z}\left[\rho w^{\prime\prime\prime} q_\mathrm{t}^{\prime\prime\prime} \right]_\mathrm{m}$",
     r"$B_\mathrm{h} = - \nabla_\mathrm{h} \cdot \left[\mathbf{v}^{\prime\prime\prime} q_\mathrm{t}^{\prime\prime\prime}\right]_\mathrm{m}$",
 ]
@@ -22,8 +20,6 @@ titles = [
 terms = [
     "mesoscale_vertical_advection_of_background_moisture",
     "advection_of_mesoscale_variability",
-    "vertical_advection_of_mesoscale_variability",
-    "horizontal_advection_of_mesoscale_variability",
     "vertical_cumulus_fluxes",
     "horizontal_cumulus_fluxes",
 ]
@@ -39,7 +35,7 @@ grid = "lagrangian_grid"
 
 
 def main():
-    fig, axes = plt.subplots(3, 2, sharex="all", sharey="all", figsize=(8, 8))
+    fig, axes = plt.subplots(2, 2, sharex="all", sharey="all", figsize=(8, 6))
     for n, resolution in enumerate(["km1p1", "km4p4"]):
         cubes = iris.load(aggregation_terms_fname.format(resolution, grid), cs)
         for m, term in enumerate(terms):
@@ -90,9 +86,9 @@ def main():
     axes[0, 1].legend()
 
     fig.text(
-        0.5, 0.0, "Rate of change in mesoscale moisture anomaly (s$^{-1}$)", ha="center"
+        0.5, 0.01, "Rate of change in mesoscale moisture anomaly (s$^{-1}$)", ha="center"
     )
-    fig.text(0.0, 0.5, "Altitude (km)", rotation="vertical", va="center")
+    fig.text(0.025, 0.5, "Altitude (km)", rotation="vertical", va="center")
 
     plt.savefig(plotdir + "fig6_aggregation_terms_profile_t+34.png")
 

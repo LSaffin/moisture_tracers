@@ -17,15 +17,12 @@ from moisture_tracers.plot.figures.fig6_aggregation_terms_profile import (
 
 grid = "lagrangian_grid"
 
-# Exclude the cumulus-scale fluxes as they are negligible for column averages
-terms = terms[:4]
-
 ncols = 2
 nrows = len(terms) // 2
 
 
 def main():
-    fig, axes = plt.subplots(nrows, ncols, sharex="all", sharey="all", figsize=(8, 8))
+    fig, axes = plt.subplots(nrows, ncols, sharex="all", sharey="all", figsize=(8, 6))
     for n, resolution in enumerate(["km1p1", "km4p4"]):
         cubes = iris.load(aggregation_terms_fname.format(resolution, grid))
 
@@ -63,7 +60,7 @@ def main():
             ax.axhline(color="k")
             ax.set_title(titles[m])
             ax.text(
-                -0.125,
+                -0.05,
                 1.05,
                 "({})".format(ascii_lowercase[m]),
                 dict(fontsize="large"),
@@ -84,7 +81,7 @@ def main():
         rotation="vertical",
         va="center",
     )
-    fig.text(0.5, 0.05, r"Time (2$^\mathrm{nd}$ Feb)", ha="center")
+    fig.text(0.5, 0.01, r"Time (2$^\mathrm{nd}$ Feb)", ha="center")
 
     plt.savefig(plotdir + "fig7_aggregation_terms_by_column.png")
 
