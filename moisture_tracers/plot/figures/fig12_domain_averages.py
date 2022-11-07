@@ -21,8 +21,8 @@ with open("divergence.pkl", "rb") as f:
 
 diagnostics = [
     ("total_column_water", "Total Column Water (kg m$^{-2}$)"),
-    ("conv", "Moisture Convergence (kg m$^{-2}$ hr$^{-1}$)"),
-    ("adv", "Moisture Advection (kg m$^{-2}$ hr$^{-1}$)"),
+    ("moisture_divergence", "Moisture Convergence (kg m$^{-2}$ hr$^{-1}$)"),
+    ("moisture_advection", "Moisture Advection (kg m$^{-2}$ hr$^{-1}$)"),
     ("upward_air_velocity", "Vertical Velocity (m s$^{-1}$)"),
     (
         "atmosphere_cloud_liquid_water_content",
@@ -34,32 +34,33 @@ diagnostics = [
     ("toa_outgoing_shortwave_flux", "Outgoing Shortwave Flux (W m$^{-2}$)"),
 ]
 
-resolutions = ["km1p1", "km2p2", "km4p4"]
-start_times = ["0201", "0202"]
+run_labels = ["Default", "Late start", "No evap", "RHB"]
 
-run_labels = ["Default", "Late start", "No evap"]
-
-times = [datetime.datetime(2020, 2, 2) + datetime.timedelta(hours=n) for n in range(24+1)]
+times = [
+    datetime.datetime(2020, 2, 2) + datetime.timedelta(hours=n) for n in range(24 + 1)
+]
 
 
 def main():
     fig, axes = plt.subplots(3, 3, figsize=(12, 10), sharex="all")
 
-    for n, resolution in enumerate(resolutions):
-        for m, (start_time, grid) in enumerate(
-            [
-                ("0201", "lagrangian_grid"),
-                ("0202", "lagrangian_grid"),
-                ("0201", "lagrangian_grid_no_evap"),
-            ]
-        ):
+    for m, (start_time, grid, resolutions) in enumerate(
+        [
+            ("0201", "lagrangian_grid", ["km1p1", "km2p2", "km4p4"]),
+            ("0202", "lagrangian_grid", ["km1p1"]),
+            ("0201", "lagrangian_grid_no_evap", ["km1p1"]),
+            ("0201", "lagrangian_grid_Ron_Brown", ["km1p1"]),
+        ]
+    ):
+        for n, resolution in enumerate(resolutions):
+            fname1 = "domain_averages_2020{}_{}_{}.nc".format(
+                start_time, resolution, grid
+            )
+            fname2 = "moisture_budget_large_scale_2020{}_{}_{}.nc".format(
+                start_time, resolution, grid
+            )
             cubes = iris.load(
-                datadir
-                + "diagnostics_vn12/domain_averages_2020{}_{}_{}.nc".format(
-                    start_time,
-                    resolution,
-                    grid,
-                )
+                [datadir + "diagnostics_vn12/" + fname for fname in (fname1, fname2)]
             )
 
             for i, (diag, title) in enumerate(diagnostics):
@@ -72,12 +73,8 @@ def main():
                 else:
                     label = None
 
-                mkey = grid + resolution + "2020" + start_time
-
-                if diag == "adv":
-                    plt.plot(times, np.array(adv[mkey])*3600, color="C{}".format(m), linestyle=linestyles[resolution], label=label)
-                elif diag == "conv":
-                    plt.plot(times, np.array(conv[mkey])*3600, color="C{}".format(m), linestyle=linestyles[resolution], label=label)
+                if "moisture" in diag:
+                    cube = cubes.extract_cube(diag) * 3600
                 else:
                     try:
                         cube = cubes.extract(diag + "_mean")
@@ -92,7 +89,9 @@ def main():
                             cube = cube.concatenate_cube()
                     except ValueError:
                         print(diag)
-                        cube = cubes.extract_cube("TOTAL COLUMN Q (WATER VAPOUR PATH)_mean")
+                        cube = cubes.extract_cube(
+                            "TOTAL COLUMN Q (WATER VAPOUR PATH)_mean"
+                        )
 
                     if cube.ndim == 2:
                         # Average wind from 0-2km
@@ -104,12 +103,13 @@ def main():
                         )
                         dz = irise.grid.thickness(cube[0], z_name=z_name)
                         cube = cube.collapsed([z_name], MEAN, weights=dz.data)
-                    iplt.plot(
-                        cube,
-                        color="C{}".format(m),
-                        linestyle=linestyles[resolution],
-                        label=label,
-                    )
+
+                iplt.plot(
+                    cube,
+                    color="C{}".format(m),
+                    linestyle=linestyles[resolution],
+                    label=label,
+                )
 
                 if n == 0 and m == 0:
                     ax.set_title(title)
@@ -127,7 +127,6 @@ def main():
     axes[0, 2].axhline(color="k")
     axes[1, 0].axhline(color="k")
     axes[2, 0].set_ylim(750, 1150)
-    axes[2, 2].set_ylim(0, 290)
 
     axes[0, 0].set_xlim(datetime.datetime(2020, 2, 2), datetime.datetime(2020, 2, 3))
     axes[0, 0].xaxis.set_major_formatter(date_format)
@@ -173,9 +172,12 @@ def plot_era5(axes):
     plt.axes(axes[2, 1])
     iplt.plot(-lw / 3600, **kwargs)
 
-    sw = era5.extract_cube("toa_net_upward_shortwave_flux")
+    sw_net = era5.extract_cube("toa_net_upward_shortwave_flux")
+    sw_in = era5.extract_cube("TOA incident solar radiation")
+
+    sw = sw_in - sw_net
     plt.axes(axes[2, 2])
-    iplt.plot(sw / (4*3600), **kwargs)
+    iplt.plot(sw / 3600, **kwargs)
 
 
 if __name__ == "__main__":
