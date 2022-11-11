@@ -21,8 +21,8 @@ with open("divergence.pkl", "rb") as f:
 
 diagnostics = [
     ("total_column_water", "Total Column Water (kg m$^{-2}$)"),
-    ("moisture_divergence", "Moisture Convergence (kg m$^{-2}$ hr$^{-1}$)"),
-    ("moisture_advection", "Moisture Advection (kg m$^{-2}$ hr$^{-1}$)"),
+    ("moisture_flux_convergence", r"$\nabla_h \cdot (\rho q \mathbf{v})$ (kg m$^{-2}$ hr$^{-1}$)"),
+    ("moisture_convergence", r"$\rho q \nabla_h \cdot \mathbf{v}$ (kg m$^{-2}$ hr$^{-1}$)"),
     ("upward_air_velocity", "Vertical Velocity (m s$^{-1}$)"),
     (
         "atmosphere_cloud_liquid_water_content",
@@ -73,8 +73,10 @@ def main():
                 else:
                     label = None
 
-                if "moisture" in diag:
-                    cube = cubes.extract_cube(diag) * 3600
+                if diag == "moisture_flux_convergence":
+                    cube = (cubes.extract_cube("moisture_advection") + cubes.extract_cube("moisture_divergence")) * 3600
+                elif diag == "moisture_convergence":
+                    cube = cubes.extract_cube("moisture_divergence") * 3600
                 else:
                     try:
                         cube = cubes.extract(diag + "_mean")
@@ -94,7 +96,7 @@ def main():
                         )
 
                     if cube.ndim == 2:
-                        # Average wind from 0-2km
+                        # Average wind from 0-3km
                         z_name = "height_above_reference_ellipsoid"
                         cube = cube.extract(
                             iris.Constraint(
@@ -126,6 +128,8 @@ def main():
     axes[0, 1].axhline(color="k")
     axes[0, 2].axhline(color="k")
     axes[1, 0].axhline(color="k")
+    axes[0, 1].set_ylim(-0.65, 0.25)
+    axes[0, 2].set_ylim(-0.65, 0.25)
     axes[2, 0].set_ylim(750, 1150)
 
     axes[0, 0].set_xlim(datetime.datetime(2020, 2, 2), datetime.datetime(2020, 2, 3))
