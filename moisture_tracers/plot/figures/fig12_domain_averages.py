@@ -1,9 +1,7 @@
 from string import ascii_lowercase
 import datetime
-import pickle
 
 import iris
-import numpy as np
 from iris.analysis import MEAN
 from iris.exceptions import ConcatenateError
 import iris.plot as iplt
@@ -14,10 +12,6 @@ import irise
 from moisture_tracers import datadir, plotdir
 from moisture_tracers.plot.figures import linestyles, labels, date_format
 
-with open("advection.pkl", "rb") as f:
-    adv = pickle.load(f)
-with open("divergence.pkl", "rb") as f:
-    conv = pickle.load(f)
 
 diagnostics = [
     ("total_column_water", "Total Column Water (kg m$^{-2}$)"),
