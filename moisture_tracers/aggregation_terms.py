@@ -61,7 +61,7 @@ def main(path, start_time, resolution, data_grid, coarse_factor=4, output_path="
         path=path, start_time=start_time, resolution=resolution, grid=data_grid
     )
 
-    if data_grid == "lagrangian_grid":
+    if "lagrangian" in data_grid:
         tr = trajectory.load(
             datadir
             + "trajectories/trajectories_{}_{}_500m.pkl".format(
@@ -75,7 +75,7 @@ def main(path, start_time, resolution, data_grid, coarse_factor=4, output_path="
         print(forecast.lead_time)
         specific_fixes(cubes)
 
-        if data_grid == "lagrangian_grid":
+        if "lagrangian" in data_grid:
             subtract_winds(cubes, tr)
 
         qt_meso, a_v, a_h, b_v, b_h, c = get_aggregation_terms(cubes, coarse_factor)
