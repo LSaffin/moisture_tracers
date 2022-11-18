@@ -120,7 +120,7 @@ def subtract_winds(cubes, tr):
     v.data -= tr["y_wind"][t_index]
 
 
-def get_aggregation_terms(cubes, coarse_factor):
+def get_aggregation_terms(cubes, coarse_factor, large_scale_factor=None):
     """
     Calculate the aggregation terms from the cubes. The coarse factor is the ratio
     between the gridbox size in the cubes and the gridbox size used for mesoscale
@@ -129,6 +129,7 @@ def get_aggregation_terms(cubes, coarse_factor):
     Args:
         cubes (iris.cube.CubeList):
         coarse_factor (int):
+        large_scale_factor (int):
 
     Returns:
         tuple:
@@ -140,10 +141,18 @@ def get_aggregation_terms(cubes, coarse_factor):
     w = cubes.extract_cube("upward_air_velocity")
     density = cubes.extract_cube("air_density")
 
-    qt_mean, qt_meso, qt_cu = decompose_scales(qt, coarse_factor=coarse_factor)
-    u_mean, u_meso, u_cu = decompose_scales(u, coarse_factor=coarse_factor)
-    v_mean, v_meso, v_cu = decompose_scales(v, coarse_factor=coarse_factor)
-    w_mean, w_meso, w_cu = decompose_scales(w, coarse_factor=coarse_factor)
+    qt_mean, qt_meso, qt_cu = decompose_scales(
+        qt, coarse_factor=coarse_factor, large_scale_factor=large_scale_factor
+    )
+    u_mean, u_meso, u_cu = decompose_scales(
+        u, coarse_factor=coarse_factor, large_scale_factor=large_scale_factor
+    )
+    v_mean, v_meso, v_cu = decompose_scales(
+        v, coarse_factor=coarse_factor, large_scale_factor=large_scale_factor
+    )
+    w_mean, w_meso, w_cu = decompose_scales(
+        w, coarse_factor=coarse_factor, large_scale_factor=large_scale_factor
+    )
 
     a_v, a_h = advection_of_mesoscale_variability(
         qt_meso, u_meso + u_mean, v_meso + v_mean, w_meso + w_mean
