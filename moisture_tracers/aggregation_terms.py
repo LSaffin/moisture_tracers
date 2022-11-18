@@ -293,7 +293,10 @@ def mesoscale_vertical_advection_of_mean_state(qt_mean, w_meso):
 
     z = w_meso.coord("altitude")
     dqt_dz = dqt_dz.interpolate([(z.name(), z.points)], Linear())
-    dqt_dz.replace_coord(w_meso.coord("atmosphere_hybrid_height_coordinate"))
+
+    dqt_dz = w_meso[:, 0, 0].copy(data=dqt_dz.data)
+    dqt_dz.units = "m-1"
+
     dqt_dz = grid.broadcast_to_cube(dqt_dz, w_meso)
 
     c = -w_meso * dqt_dz
