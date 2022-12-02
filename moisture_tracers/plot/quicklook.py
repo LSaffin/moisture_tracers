@@ -27,7 +27,7 @@ from twinotter.util.scripting import parse_docopt_arguments
 import irise
 from irise import plot
 
-from moisture_tracers import grey_zone_forecast, specific_fixes
+from moisture_tracers import grey_zone_forecast
 
 
 zlevs = ("altitude", [50, 300, 500, 1000, 1500, 2000, 3000, 4000])
@@ -229,7 +229,6 @@ def main(
     )
 
     for cubes in forecast:
-        specific_fixes(cubes)
         make_plots(
             cubes,
             forecast.lead_time,

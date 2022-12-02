@@ -6,7 +6,7 @@ from iris.analysis import AreaWeighted
 
 import irise
 
-import moisture_tracers
+from moisture_tracers import grey_zone_forecast, datadir
 from moisture_tracers import datadir
 
 
@@ -22,8 +22,8 @@ def main():
     ):
         print(start_time, grid)
         for n, resolution in enumerate(resolutions):
-            fcst = moisture_tracers.grey_zone_forecast(
-                path=moisture_tracers.datadir + "regridded_vn12/",
+            fcst = grey_zone_forecast(
+                path=datadir + "regridded_vn12/",
                 start_time=start_time,
                 resolution=resolution,
                 lead_times=range(48 + 1),
@@ -41,7 +41,6 @@ def main():
                 cubes = cubes.extract(
                     iris.Constraint(time=lambda x: x.point == fcst.current_time)
                 )
-                moisture_tracers.specific_fixes(cubes)
 
                 f, d = get_fluxes(cubes)
                 results.append(f)

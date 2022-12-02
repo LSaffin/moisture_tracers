@@ -10,7 +10,6 @@ from iris.analysis import MEAN, AreaWeighted, Nearest
 from irise import convert
 
 from moisture_tracers import grey_zone_forecast, datadir
-from moisture_tracers import specific_fixes
 from moisture_tracers.regrid_common import generate_1km_grid
 
 
@@ -26,7 +25,6 @@ def main():
     )
 
     cubes = forecast.set_lead_time(hours=lead_time)
-    specific_fixes(cubes)
     qt = convert.calc("total_column_water", cubes)
 
     qt_mean, qt_16km, qt_cu = decompose_scales(qt, coarse_factor=4)
