@@ -10,8 +10,9 @@ import datetime
 import iris.exceptions
 from dateutil.parser import parse as dateparse
 
+import irise
 from irise.interpolate import remap_3d
-from irise.forecast import Forecast
+from irise.forecast import Forecast, _CubeLoader
 
 from myscripts.projects.eurec4a.moisture_tracers import datadir, plotdir
 
@@ -80,7 +81,9 @@ def grey_zone_forecast(
             for dt in lead_times
         }
 
-    return Forecast(start_time, mapping)
+    forecast = Forecast(start_time, mapping)
+    forecast._loader = _ApproxLoader(forecast._loader.files)
+    return forecast
 
 
 def specific_fixes(cubes):
@@ -113,3 +116,22 @@ def specific_fixes(cubes):
     for cube in regridded:
         cubes.remove(cubes.extract_cube(cube.name()))
         cubes.append(cube)
+
+
+class _ApproxLoader(_CubeLoader):
+
+    def _load_new_time(self, time):
+        """ Loads a new cubelist and removes others if necessary
+
+        Args:
+            time (datetime.datetime): The new time to be loaded
+        """
+        # Clear space for the new files
+        self._make_space(time)
+
+        # Load data from files with that lead time
+        cubes = irise.load(self.files[time])
+        specific_fixes(cubes)
+
+        # Add the data to the loaded files
+        self._loaded[time] = cubes
