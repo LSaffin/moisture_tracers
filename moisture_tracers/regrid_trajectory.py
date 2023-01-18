@@ -1,11 +1,11 @@
 """Extract a small grid of data from a trajectory within a large domain
 
 Usage:
-    regrid_trajectory.py from_coords
+    regrid_trajectory.py to_size
         <forecast_path> <forecast_start> <forecast_resolution>
-        <trajectory_filename> <x0> <y0> <domain_size>
+        <trajectory_filename> <domain_size>
         [<output_path>]
-    regrid_trajectory.py from_grid
+    regrid_trajectory.py to_grid
         <forecast_path> <forecast_start> <forecast_resolution>
         <trajectory_filename> <initial_grid>
         [<output_path>]
@@ -35,20 +35,15 @@ from twinotter.util.scripting import parse_docopt_arguments
 
 from moisture_tracers import grey_zone_forecast
 
-# HALO: x0=302.283, y0=13.3
-# Ron Brown: x0=305.5, y0=13.9
-
 
 def main(
     forecast_path,
     forecast_start,
     forecast_resolution,
     trajectory_filename,
-    from_coords=False,
-    x0=None,
-    y0=None,
+    to_size=False,
     domain_size=None,
-    from_grid=False,
+    to_grid=False,
     initial_grid=None,
     output_path=".",
 ):
@@ -62,7 +57,7 @@ def main(
         grid=None,
     )
 
-    if from_grid:
+    if to_grid:
         grid = iris.load_cube(initial_grid)
         grid_x = grid.coord("grid_longitude")
         grid_y = grid.coord("grid_latitude")
@@ -74,9 +69,11 @@ def main(
 
         cubes = forecast.set_time(time)
 
-        if n == 0 and from_coords:
+        if n == 0 and to_size:
             large_grid = cubes.extract_cube("atmosphere_boundary_layer_thickness")
-            grid = create_grid(large_grid, x0, y0, domain_size)
+            x0 = tr[time][0, 0]
+            y0 = tr[time][0, 1]
+            grid = create_grid(large_grid, x0, y0, float(domain_size))
             grid_x = grid.coord("grid_longitude")
             grid_y = grid.coord("grid_latitude")
 
