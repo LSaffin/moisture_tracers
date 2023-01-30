@@ -1,7 +1,7 @@
 """
 
 Usage:
-    trajectory.py <path> <start_time> <resolution> <x0> <y0> <z0> <t0>
+    trajectory.py <path> <start_time> <resolution> <x0> <y0> <z0> <t0> [<output_path>]
     trajectory.py (-h | --help)
 
 Arguments:
@@ -27,9 +27,11 @@ from moisture_tracers import grey_zone_forecast
 
 # HALO: x0=302.283, y0=13.3
 # Ron Brown (2nd Feb): x0=305.5, y0=13.9
-# 24th Jan Case study: x0=302.5, y0=11.75, t0=T+24h
+# 24th Jan Case study:
+#   x0=302.5, y0=11.75, t0=T+24h
+#   x0=310.0, y0=15.0,  t0=T+48h
 
-def main(path, start_time, resolution, x0, y0, z0, t0):
+def main(path, start_time, resolution, x0, y0, z0, t0, output_path="./"):
     x0, y0, z0 = float(x0), float(y0), float(z0)
     t0 = int(t0)
 
@@ -61,7 +63,7 @@ def main(path, start_time, resolution, x0, y0, z0, t0):
         traout = traout_bck + traout_fwd
 
     traout.save(
-        "trajectories_{}_{}_{}E_{}N_{}m_T+{}.pkl".format(
+        output_path + "{}_{}_{}E_{}N_{}m_T+{}.pkl".format(
             forecast.start_time.strftime("%Y%m%d"),
             resolution,
             format_float_for_file(x0),
