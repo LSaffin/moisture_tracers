@@ -64,10 +64,9 @@ def main(
         x0 = grid_x.points.mean()
         y0 = grid_y.points.mean()
 
-    for n, time in enumerate(tr.times):
+    for n, cubes in enumerate(forecast):
+        time = forecast.current_time
         print(time)
-
-        cubes = forecast.set_time(time)
 
         if n == 0 and to_size:
             large_grid = cubes.extract_cube("atmosphere_boundary_layer_thickness")
