@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 import cmcrameri
 
 from pylagranto import trajectory
-from twinotter.external import eurec4a
 
 from moisture_tracers import datadir, plotdir, grey_zone_forecast
+from moisture_tracers.plot.figures import add_halo_circle
 
 
 lead_times = [6, 30, 48]
@@ -74,7 +74,7 @@ def main():
 
     ax.set_ylim(11, 19)
     ax.set_xlim(180 - 62, 180 - 44)
-    eurec4a.add_halo_circle(ax, alpha=0.75, lw=3)
+    add_halo_circle(ax)
 
     plt.savefig(plotdir + "fig3_lagrangian_domain_example_1p1km.png")
 

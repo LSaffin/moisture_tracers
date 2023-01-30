@@ -4,10 +4,9 @@ import cartopy.crs as ccrs
 import irise
 from irise.diagnostics.contours import haversine
 from pylagranto import trajectory
-from twinotter.external.eurec4a import add_halo_circle
 
 from moisture_tracers import datadir, plotdir, grey_zone_forecast
-from moisture_tracers.plot.figures import linestyles, date_format
+from moisture_tracers.plot.figures import linestyles, date_format, add_halo_circle
 
 from matplotlib.lines import Line2D
 
@@ -93,7 +92,7 @@ def main():
     axes[0].add_artist(leg1)
     axes[0].coastlines()
     axes[0].gridlines()
-    add_halo_circle(axes[0], linewidth=3)
+    add_halo_circle(axes[0])
     axes[0].text(
         -0.05, 1.05, "(a)", dict(fontsize="large"), transform=axes[0].transAxes
     )

@@ -9,10 +9,9 @@ import matplotlib.pyplot as plt
 import cmcrameri
 
 import irise
-from twinotter.external import eurec4a
 
 from moisture_tracers import datadir, plotdir
-from moisture_tracers.plot.figures import z_levs
+from moisture_tracers.plot.figures import z_levs, add_halo_circle
 
 variable = "total_column_water"
 vmin, vmax = 20, 50
@@ -55,7 +54,7 @@ def main():
     )
 
     ax = plt.gca()
-    eurec4a.add_halo_circle(ax, alpha=0.75, lw=1)
+    add_halo_circle(ax)
     ax.coastlines()
     gl = ax.gridlines()
     gl.ylabels_left = True

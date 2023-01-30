@@ -1,6 +1,9 @@
 import numpy as np
 import cartopy.crs as ccrs
 import matplotlib.dates as mdates
+import cmcrameri
+
+from twinotter.external import eurec4a
 
 
 date_format = mdates.DateFormatter("%HZ")
@@ -45,3 +48,8 @@ z_levs = 40 * np.array([
     3.850676e-01, 4.160496e-01, 4.515977e-01, 4.924007e-01, 5.392213e-01, 5.929016e-01,
     6.543679e-01, 7.246365e-01, 8.048183e-01, 8.961251e-01, 1.000000e+00
 ])
+
+
+def add_halo_circle(ax):
+    eurec4a.add_halo_circle(ax, alpha=1, lw=3, color="w")
+    eurec4a.add_halo_circle(ax, alpha=1, lw=2)
