@@ -2,6 +2,7 @@ import datetime
 
 import iris
 import iris.plot as iplt
+import numpy as np
 import matplotlib.pyplot as plt
 
 from moisture_tracers import datadir, plotdir
@@ -9,9 +10,10 @@ from moisture_tracers.plot.figures import linestyles, alphas, labels, date_forma
 
 aggregation_terms_fname = "diagnostics_vn12/aggregation_terms_by_quartile_{}_{}_{}.nc"
 resolutions = dict(
-    coarse_grid=["km1p1", "km2p2", "km4p4", "D100m_300m", "D100m_500m"],
+    coarse_grid=["km1p1", "km2p2", "km4p4"],
     lagrangian_grid=["km1p1", "km2p2", "km4p4"],
     lagrangian_grid_no_evap=["km1p1", "km2p2", "km4p4"],
+    lagrangian_grid_Ron_Brown=["km1p1", "km2p2", "km4p4"],
 )
 
 variable = "total_column_water"
@@ -20,7 +22,7 @@ variable = "total_column_water"
 def main():
     fig, axes = plt.subplots(2, 1, sharex="all", figsize=(8, 8))
 
-    start_time = "20200201"
+    start_time = "20200123"
     make_plot(
         axes,
         "coarse_grid",
@@ -28,7 +30,7 @@ def main():
         color_fig="k",
         alpha_fig=0.25,
     )
-    make_plot(axes, "lagrangian_grid", start_time, add_label=True)
+    make_plot(axes, "lagrangian_grid_Ron_Brown", start_time, add_label=True)
     figure_formatting(fig, axes)
 
     plt.savefig(plotdir + "fig5_moisture_quartiles_lagrangian_grid.png")
@@ -72,18 +74,29 @@ def make_plot(
             else:
                 alpha = alpha_fig
 
-            iplt.plot(cube, linestyle=linestyle, alpha=alpha, color=color, label=label)
+            if "Ron_Brown" not in grid:
+                iplt.plot(
+                    cube, linestyle=linestyle, alpha=alpha, color=color, label=label
+                )
 
         plt.axes(axes[1])
 
         if add_label:
             label = labels[resolution]
 
+        if "Ron_Brown" in grid:
+            color = "C3"
+            if resolution == "km1p1":
+                label = "RHB"
+            else:
+                label = None
+        else:
+            color = "k"
         iplt.plot(
             tcw[:, -1] - tcw[:, 0],
             linestyle=linestyle,
             alpha=alpha,
-            color="k",
+            color=color,
             label=label,
         )
 
