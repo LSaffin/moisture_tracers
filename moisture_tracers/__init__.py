@@ -120,6 +120,10 @@ def grey_zone_forecast(
 
     forecast = Forecast(start_time, mapping)
     forecast._loader = _ApproxLoader(forecast._loader.files)
+
+    if output_type.lower() == "rmed":
+        forecast._loader.match_timestamp = True
+
     return forecast
 
 
@@ -156,6 +160,8 @@ def specific_fixes(cubes):
 
 class _ApproxLoader(_CubeLoader):
 
+    match_timestamp = False
+
     def _load_new_time(self, time):
         """ Loads a new cubelist and removes others if necessary
 
@@ -167,7 +173,32 @@ class _ApproxLoader(_CubeLoader):
 
         # Load data from files with that lead time
         cubes = irise.load(self.files[time])
+
+        if self.match_timestamp:
+            cubes = cubes.extract(
+                iris.Constraint(time=lambda cell: get_correct_time(cell, time))
+            )
+
         specific_fixes(cubes)
 
         # Add the data to the loaded files
         self._loaded[time] = cubes
+
+
+def get_correct_time(cell, time):
+    """Fudge loading the correct timestamp from files with multiple times in
+
+    Pass as a function to iris.Constraint.
+
+    The timestamps on radiative fields are one timestep past the hour requested so only
+    match these by hour. This only works under the assumption that the data is hourly or
+    n-hourly
+
+    The timestamps on accumulated fields (e.g. precipitation) is in the middle of the
+    accumulation period, but we want to match the end of this time, so match by the
+    bound of the timestamp instead.
+    """
+    if cell.bound is None:
+        return cell.point.hour == time.hour
+    else:
+        return cell.bound[-1].hour == time.hour
