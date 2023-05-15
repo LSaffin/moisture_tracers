@@ -30,13 +30,13 @@ def main():
     fig = make_plot("20200202", "lagrangian_grid", resolutions, lead_times)
     fig.suptitle("Late start")
     fig.text(0.05, 0.95, "(a)", dict(fontsize="large"))
-    plt.savefig(plotdir + "fig9_satellite_comparison_sensitivities_late_start.png")
+    plt.savefig(plotdir + "fig10_satellite_comparison_sensitivities_late_start.png")
 
     lead_times = [30, 36, 42, 48]
     fig = make_plot("20200201", "lagrangian_grid_no_evap", resolutions, lead_times)
     fig.suptitle("No Evap")
     fig.text(0.05, 0.95, "(b)", dict(fontsize="large"))
-    plt.savefig(plotdir + "fig9_satellite_comparison_sensitivities_no_evap.png")
+    plt.savefig(plotdir + "fig10_satellite_comparison_sensitivities_no_evap.png")
 
 
 def make_plot(start_time, grid, resolutions, lead_times):

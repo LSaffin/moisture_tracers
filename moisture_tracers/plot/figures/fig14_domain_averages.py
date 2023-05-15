@@ -138,7 +138,7 @@ def main():
     axes[0, 0].legend(h, l, loc="upper left")
     axes[0, 0].add_artist(lg1)
 
-    plt.savefig(plotdir + "fig12_domain_averages.png")
+    plt.savefig(plotdir + "fig14_domain_averages.png")
 
 
 def plot_era5(axes):

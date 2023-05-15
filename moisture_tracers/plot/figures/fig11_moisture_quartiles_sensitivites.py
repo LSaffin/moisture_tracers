@@ -44,7 +44,7 @@ def main():
             transform=axes[n // 2, n % 2].transAxes,
         )
 
-    plt.savefig(plotdir + "fig10_moisture_quartiles_sensitivities.png")
+    plt.savefig(plotdir + "fig11_moisture_quartiles_sensitivities.png")
 
 
 if __name__ == "__main__":

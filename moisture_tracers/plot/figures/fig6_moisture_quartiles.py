@@ -33,7 +33,7 @@ def main():
     make_plot(axes, "lagrangian_grid_Ron_Brown", start_time, add_label=True)
     figure_formatting(fig, axes)
 
-    plt.savefig(plotdir + "fig5_moisture_quartiles_lagrangian_grid.png")
+    plt.savefig(plotdir + "fig6_moisture_quartiles_lagrangian_grid.png")
 
 
 def make_plot(

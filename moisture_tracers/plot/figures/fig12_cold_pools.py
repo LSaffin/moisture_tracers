@@ -83,7 +83,7 @@ def main():
         cbar = plt.colorbar(im, cax=ax, extend="both", orientation="vertical")
         cbar.set_label(labels[n])
 
-    plt.savefig(plotdir + "fig11_cold_pools.png")
+    plt.savefig(plotdir + "fig12_cold_pools.png")
 
 
 if __name__ == "__main__":

@@ -106,7 +106,7 @@ def main():
         )
 
         plt.savefig(
-            plotdir + "fig8_moisture_tracer_aggregation_{}.png".format(resolution)
+            plotdir + "fig9_moisture_tracer_aggregation_{}.png".format(resolution)
         )
 
 

@@ -83,7 +83,7 @@ def main():
     )
     fig.text(0.5, 0.01, r"Time (2$^\mathrm{nd}$ Feb)", ha="center")
 
-    plt.savefig(plotdir + "fig7_aggregation_terms_by_column.png")
+    plt.savefig(plotdir + "fig8_aggregation_terms_by_column.png")
 
 
 if __name__ == "__main__":

@@ -105,7 +105,7 @@ def main():
         -0.05, 1.05, "(b)", dict(fontsize="large"), transform=axes[1].transAxes
     )
 
-    plt.savefig(plotdir + "figB1_trajectory_comparison.png")
+    plt.savefig(plotdir + "fig5_trajectory_comparison.png")
 
 
 def add_domain_box(ax, start_time, resolution, grid, **kwargs):

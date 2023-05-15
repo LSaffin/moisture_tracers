@@ -127,7 +127,7 @@ def make_plot():
             0.01, 1.05, "({})".format(letter), transform=ax_dict[letter].transAxes
         )
 
-    plt.savefig(plotdir + "figx_cloud_fraction.png")
+    plt.savefig(plotdir + "fig13_cloud_fraction.png")
 
 
 def make_row(ref, start_time, resolutions, grid, ax_dict, letters):
@@ -141,7 +141,7 @@ def make_row(ref, start_time, resolutions, grid, ax_dict, letters):
         cf.coord("height_above_reference_ellipsoid").convert_units("km")
         diff = cf - ref.data
 
-        im = iplt.pcolormesh(#
+        im = iplt.pcolormesh(
             diff, **plot_kwargs, coords=["time", "height_above_reference_ellipsoid"]
         )
         ax.set_title(labels[resolution])
