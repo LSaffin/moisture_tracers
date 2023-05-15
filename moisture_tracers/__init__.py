@@ -7,6 +7,7 @@ __version__ = "0.1.0"
 
 from math import floor
 import datetime
+import pathlib
 
 import iris.exceptions
 from dateutil.parser import parse as dateparse
@@ -15,7 +16,9 @@ import irise
 from irise.interpolate import remap_3d
 from irise.forecast import Forecast, _CubeLoader
 
-from myscripts.projects.eurec4a.moisture_tracers import datadir, plotdir
+home = pathlib.Path("~/Documents/meteorology").expanduser()
+datadir = str(home / "data/eurec4a/um/moisture_tracers/") + "/"
+plotdir = str(home / "output/eurec4a/moisture_tracers/") + "/"
 
 # Filename Patterns
 # model-variables_YYYYMMDDTHHMM_T+HH.nc and

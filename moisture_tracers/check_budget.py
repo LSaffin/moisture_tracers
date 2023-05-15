@@ -25,7 +25,7 @@ import irise
 from irise import convert
 from twinotter.util.scripting import parse_docopt_arguments
 
-from myscripts import plotdir
+from moisture_tracers import plotdir
 
 budgets = dict(
     total_minus_advection_only_q=[

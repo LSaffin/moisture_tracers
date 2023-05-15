@@ -8,9 +8,8 @@ import iris.plot as iplt
 import matplotlib.pyplot as plt
 
 from irise import convert
-from myscripts import plotdir
 
-from moisture_tracers import grey_zone_forecast, datadir
+from moisture_tracers import grey_zone_forecast, datadir, plotdir
 from moisture_tracers.anomaly_scale_decomposition import decompose_scales
 
 
