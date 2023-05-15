@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from moisture_tracers import plotdir
 from moisture_tracers.plot.figures import date_format
-from moisture_tracers.plot.figures.fig5_moisture_quartiles import make_plot
+from moisture_tracers.plot.figures.fig6_moisture_quartiles import make_plot
 
 
 def main():

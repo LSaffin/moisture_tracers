@@ -9,7 +9,7 @@ import irise
 
 from moisture_tracers import plotdir
 from moisture_tracers.plot.figures import linestyles, labels, date_format
-from moisture_tracers.plot.figures.fig6_aggregation_terms_profile import (
+from moisture_tracers.plot.figures.fig7_aggregation_terms_profile import (
     aggregation_terms_fname,
     titles,
     terms,
