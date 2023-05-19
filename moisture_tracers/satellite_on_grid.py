@@ -39,7 +39,7 @@ import cmcrameri
 
 from twinotter.util.scripting import parse_docopt_arguments
 from twinotter.external.eurec4a import add_halo_circle
-from twinotter.external.goes import load_nc, load_ceres
+from twinotter.external.goes import load_nc
 from twinotter.external.goes.plot import geocolor
 
 
@@ -103,11 +103,9 @@ def toa_brightness_temperature(ax, ds, projection):
 def goes_regridded(path, time, lons, lats, variables, source="goes"):
     if source.lower() == "goes":
         ds = load_nc(path, time)
-    elif source.lower() == "ceres":
-        ds = load_ceres(path, time)
     else:
         raise KeyError(
-            "Source {} not supported. Select either 'goes' or 'ceres'".format(source)
+            "Source {} not supported. Only 'goes' currently available".format(source)
         )
 
     # Flatten and remove NaNs. The NaNs aren't in a square grid so can't be dropped on
