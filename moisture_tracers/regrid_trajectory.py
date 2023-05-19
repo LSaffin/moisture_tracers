@@ -59,8 +59,8 @@ def main(
 
     if to_grid:
         grid = iris.load_cube(initial_grid)
-        grid_x = grid.coord("grid_longitude")
-        grid_y = grid.coord("grid_latitude")
+        grid_x = grid.coord(axis="x", dim_coords=True)
+        grid_y = grid.coord(axis="y", dim_coords=True)
         x0 = grid_x.points.mean()
         y0 = grid_y.points.mean()
 
@@ -73,8 +73,8 @@ def main(
             x0 = tr[time][0, 0]
             y0 = tr[time][0, 1]
             grid = create_grid(large_grid, x0, y0, float(domain_size))
-            grid_x = grid.coord("grid_longitude")
-            grid_y = grid.coord("grid_latitude")
+            grid_x = grid.coord(axis="x", dim_coords=True)
+            grid_y = grid.coord(axis="y", dim_coords=True)
 
         # Calculate the translation from the grid centre to the current trajectory
         # position
@@ -115,22 +115,27 @@ def translate_grid(x, y, offset_x, offset_y):
 
 
 def create_grid(large_grid, x_centre, y_centre, resolution):
-    xg = large_grid.coord("grid_longitude").points
-    yg = large_grid.coord("grid_latitude").points
+    lon = large_grid.coord(axis="x", dim_coords=True)
+    lat = large_grid.coord(axis="y", dim_coords=True)
 
-    xg, yg = np.meshgrid(xg, yg)
-
+    # Find all longitude and latitude points within a circle of diameter=resolution
+    # centred on (x_centre, y_centre)
+    xg, yg = np.meshgrid(lon.points, lat.points)
     mask = haversine([xg, yg], [x_centre, y_centre]) > resolution / 2
-
     xg = np.ma.masked_where(mask, xg)
     yg = np.ma.masked_where(mask, yg)
 
-    cs = iris.Constraint(
-        grid_longitude=lambda x: xg.min() <= x <= xg.max(),
-        grid_latitude=lambda y: yg.min() <= y <= yg.max(),
+    # Extract a square grid where the outermost points are defined by the circle edges
+    # The box bounds the circle
+    cube = large_grid.intersection(
+        **{
+            lon.name(): (xg.min(), xg.max()),
+            lat.name(): (yg.min(), yg.max()),
+        },
+        ignore_bounds=True,
     )
 
-    return large_grid.extract(cs)
+    return cube
 
 
 if __name__ == "__main__":

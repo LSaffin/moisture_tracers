@@ -61,14 +61,15 @@ def generate_common_grid(high_res_cube, low_res_cube):
     """We want a cube with the grid spacing of the low_res_cube but restricted to the
     domain of the high_res_cube
     """
-    lon = high_res_cube.coord("grid_longitude").points
-    lat = high_res_cube.coord("grid_latitude").points
+    lon = high_res_cube.coord(axis="x", dim_coords=True)
+    lat = high_res_cube.coord(axis="y", dim_coords=True)
 
-    common_grid_cube = low_res_cube.extract(
-        iris.Constraint(
-            grid_longitude=lambda x: lon[0] < x < lon[-1],
-            grid_latitude=lambda x: lat[0] < x < lat[-1],
-        )
+    common_grid_cube = low_res_cube.intersection(
+        **{
+            lon.name(): (lon.points.min(), lon.points.max()),
+            lat.name(): (lat.points.min(), lat.points.max()),
+        },
+        ignore_bounds=True
     )
 
     return common_grid_cube
@@ -80,8 +81,8 @@ def generate_1km_grid(cube_500m, coarse_factor=2):
     # coordinate bounds which then don't allow area-weighted regridding because they
     # are not contiguous
     # Extract coordinates
-    lon = cube_500m.coord("grid_longitude")
-    lat = cube_500m.coord("grid_latitude")
+    lon = cube_500m.coord(axis="x", dim_coords=True)
+    lat = cube_500m.coord(axis="y", dim_coords=True)
 
     # Get the average coordinate of every n points, where n is the coarse graining
     # factor
@@ -123,8 +124,8 @@ def generate_large_scale_grid(cube):
     Generate a 3x3 grid that uses the input cube domain as the inner grid point and a
     2x2 grid that is at the 1/2 points in the 3x3 grid
     """
-    lon, lon_offset = generate_large_scale_coord(cube.coord("grid_longitude"))
-    lat, lat_offset = generate_large_scale_coord(cube.coord("grid_latitude"))
+    lon, lon_offset = generate_large_scale_coord(cube.coord(axis="x", dim_coords=True))
+    lat, lat_offset = generate_large_scale_coord(cube.coord(axis="y", dim_coords=True))
 
     cube_large_scale = iris.cube.Cube(
         data=np.zeros([len(lat.points), len(lon.points)]),
@@ -133,7 +134,7 @@ def generate_large_scale_grid(cube):
 
     cube_large_scale_offset = iris.cube.Cube(
         data=np.zeros([len(lat_offset.points), len(lon_offset.points)]),
-        dim_coords_and_dims=[(lat, 0), (lon, 1)],
+        dim_coords_and_dims=[(lat_offset, 0), (lon_offset, 1)],
     )
 
     return cube_large_scale, cube_large_scale_offset

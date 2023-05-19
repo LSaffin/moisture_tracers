@@ -69,15 +69,11 @@ def generate(forecast):
         for cube in cubes:
             # Don't try to collapse coordinate cubes
             if cube.ndim in (2, 3):
-                mean = cube.collapsed(
-                    ["grid_latitude", "grid_longitude"],
-                    MEAN,
-                    weights=weights[cube.ndim],
-                )
+                lon = cube.coord(axis="x", dim_coords=True)
+                lat = cube.coord(axis="y", dim_coords=True)
+                mean = cube.collapsed([lon, lat], MEAN, weights=weights[cube.ndim])
 
-                std_dev = (cube - mean).collapsed(
-                    ["grid_latitude", "grid_longitude"], RMS, weights=weights[cube.ndim]
-                )
+                std_dev = (cube - mean).collapsed([lon, lat], RMS, weights=weights[cube.ndim])
                 mean.rename(cube.name() + "_mean")
                 std_dev.rename(cube.name() + "_std_dev")
                 results.append(mean)
