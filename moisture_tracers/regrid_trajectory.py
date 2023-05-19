@@ -4,11 +4,11 @@ Usage:
     regrid_trajectory.py to_size
         <forecast_path> <forecast_start> <forecast_resolution>
         <trajectory_filename> <domain_size>
-        [<output_path>]
+        [--output_type=<str>] [--model_setup=<str>] [<output_path>]
     regrid_trajectory.py to_grid
         <forecast_path> <forecast_start> <forecast_resolution>
         <trajectory_filename> <initial_grid>
-        [<output_path>]
+        [--output_type=<str>] [--model_setup=<str>] [<output_path>]
     regrid_trajectory.py (-h | --help)
 
 Arguments:
@@ -41,6 +41,8 @@ def main(
     forecast_start,
     forecast_resolution,
     trajectory_filename,
+    output_type="default",
+    model_setup=None,
     to_size=False,
     domain_size=None,
     to_grid=False,
@@ -53,8 +55,12 @@ def main(
         forecast_path,
         start_time=forecast_start,
         resolution=forecast_resolution,
+        # TODO specify lead times from command line
+        # Currently need to modify this for 3-hourly GAL8/CoMorph data
         lead_times=range(1, 48 + 1),
         grid=None,
+        output_type=output_type,
+        model_setup=model_setup,
     )
 
     if to_grid:
@@ -90,6 +96,10 @@ def main(
         newcubes = iris.cube.CubeList()
         for cube in cubes:
             if cube.ndim > 1 and cube.name() not in ["longitude", "latitude"]:
+                for axis in ["x", "y"]:
+                    coord = cube.coord(axis=axis, dim_coords=True)
+                    if not coord.has_bounds():
+                        coord.guess_bounds()
                 newcube = cube.regrid(new_grid, regridder)
                 newcubes.append(newcube)
 

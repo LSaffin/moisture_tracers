@@ -136,7 +136,10 @@ def specific_fixes(cubes):
     # Rename "height_above_reference_ellipsoid" to "altitude" as a lot of my code
     # currently assumes an altitude coordinate
     regridded = []
-    example_cube = cubes.extract_cube("upward_air_velocity")
+    example_cube = cubes.extract_cube(iris.Constraint(
+        name="upward_air_velocity",
+        cube_func=lambda c: len(c.coords(axis="z", dim_coords=True)) == 1
+    ))
 
     try:
         z = example_cube.coord("atmosphere_hybrid_height_coordinate")
