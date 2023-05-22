@@ -1,9 +1,8 @@
 import iris
 
-from moisture_tracers import grey_zone_forecast, datadir, era5
+from irise import grid
 
-import warnings
-warnings.filterwarnings("ignore")
+from moisture_tracers import grey_zone_forecast, datadir, era5
 
 
 def main():
@@ -35,6 +34,7 @@ def main():
                                   latitude=lambda y: lat.min() <= y <= lat.max())
 
         era_grid = era5_at_time.extract(area_cs)
+        era_grid.append(calculate_vertical_velocity(era_grid))
 
         for cube in era_grid:
             cube.coord("longitude").guess_bounds()
@@ -47,5 +47,39 @@ def main():
     iris.save(era5_means, "era5_lagrangian_means.nc")
 
 
+def calculate_vertical_velocity(era5_cubes):
+    w = era5_cubes.extract_cube("lagrangian_tendency_of_air_pressure").copy()
+    z = era5_cubes.extract_cube("geopotential").copy() / 9.81
+    z.units = "m"
+
+    z.coord("pressure_level").convert_units("Pa")
+    w.coord("pressure_level").convert_units("Pa")
+
+    # Calulate vertical velocity from pressure vertical velocity
+    dz_dp = iris.analysis.calculus.differentiate(z, "pressure_level")
+    dz_dp = dz_dp.interpolate(
+        [("pressure_level", z.coord("pressure_level").points)],
+        iris.analysis.Linear()
+    )
+    dz_dt = dz_dp * w
+
+    # Calculate depth-averaged vertical velocity to 3km
+    z_c = z.copy()
+    z_c.rename("altitude")
+    grid.add_cube_as_coord(dz_dt, z_c)
+    dz_dt.coord("altitude").guess_bounds()
+    dz = grid.thickness(dz_dt)
+    weights = dz * (z.data <= 3000).astype(int)
+    w_depth = dz_dt.collapsed(["pressure_level"], iris.analysis.MEAN, weights=weights.data)
+
+    w_depth.rename("upward_air_velocity")
+
+    return w_depth
+
+
 if __name__ == '__main__':
+    import warnings
+
+    warnings.filterwarnings("ignore")
+
     main()
