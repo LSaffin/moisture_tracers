@@ -69,10 +69,8 @@ def grey_zone_forecast(
     if output_type.lower() == "default":
         if grid is None:
             mapping = {
-                start_time
-                + datetime.timedelta(hours=dt): [
-                    path
-                    + model_filename.format(
+                start_time + datetime.timedelta(hours=dt): [
+                    path + resolution + "/" + model_filename.format(
                         start_time=start_time_str, lead_time=max(0, dt - 1)
                     ),
                 ]
@@ -126,6 +124,11 @@ def grey_zone_forecast(
 
     if output_type.lower() == "rmed":
         forecast._loader.match_timestamp = True
+
+    forecast.resolution = resolution
+    forecast.grid = grid
+    forecast.model_setup = model_setup
+    forecast.output_type = output_type
 
     return forecast
 
