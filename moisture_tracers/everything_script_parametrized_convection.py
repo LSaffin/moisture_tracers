@@ -5,6 +5,7 @@ figures in moisture_tracers.plot.figures_parametrized_convection
 import warnings
 
 import iris
+from iris.cube import CubeList
 
 import pylagranto.trajectory
 
@@ -15,8 +16,8 @@ from moisture_tracers import (
     regrid_common,
     trajectory,
     regrid_trajectory,
-    domain_averages,
     aggregation_terms,
+    domain_averages,
 )
 
 regridded_path = datadir + "regridded_conv/"
@@ -91,10 +92,38 @@ def main():
                 ))
 
             # 3. Moisture Quartiles
-            pass
+            forecast_lagrangian = grey_zone_forecast(
+                path=datadir + "regridded_conv/",
+                start_time=start_time,
+                resolution=f"{model_setup}_{resolution}",
+                lead_times=range(3, 48 + 1, 3),
+                grid="lagrangian_grid",
+            )
+
+            tcw_by_quartile = CubeList()
+            for cubes in forecast_lagrangian:
+                tcw = cubes.extract_cube("total_column_water")
+                tcw_by_quartile.append(
+                    aggregation_terms.average_by_quartile(tcw, [tcw], None)[0]
+                )
+            tcw_by_quartile = tcw_by_quartile.merge_cube()
+            iris.save(
+                tcw_by_quartile,
+                diags_path + f"aggregation_terms_by_quartile_"
+                             f"{start_time}_"
+                             f"{forecast_lagrangian.resolution}_"
+                             f"{forecast_lagrangian.grid}.nc"
+            )
 
             # 4. Domain Averages
-            pass
+            results = domain_averages.generate(forecast_lagrangian)
+            iris.save(
+                results,
+                diags_path + f"domain_averages_"
+                             f"{start_time}_"
+                             f"{forecast_lagrangian.resolution}_"
+                             f"{forecast_lagrangian.grid}.nc"
+            )
 
 
 if __name__ == "__main__":

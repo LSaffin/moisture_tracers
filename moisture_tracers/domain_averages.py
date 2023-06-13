@@ -62,18 +62,15 @@ def generate(forecast):
         for cube in rad:
             cubes.append(cube)
 
-        if n == 0:
-            example_cube = cubes.extract_cube("air_pressure")
-            weights = {2: area_weights(example_cube[0]), 3: area_weights(example_cube)}
-
         for cube in cubes:
             # Don't try to collapse coordinate cubes
             if cube.ndim in (2, 3):
                 lon = cube.coord(axis="x", dim_coords=True)
                 lat = cube.coord(axis="y", dim_coords=True)
-                mean = cube.collapsed([lon, lat], MEAN, weights=weights[cube.ndim])
+                weights = area_weights(cube)
+                mean = cube.collapsed([lon, lat], MEAN, weights=weights)
 
-                std_dev = (cube - mean).collapsed([lon, lat], RMS, weights=weights[cube.ndim])
+                std_dev = (cube - mean).collapsed([lon, lat], RMS, weights=weights)
                 mean.rename(cube.name() + "_mean")
                 std_dev.rename(cube.name() + "_std_dev")
                 results.append(mean)

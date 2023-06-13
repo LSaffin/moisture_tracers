@@ -175,13 +175,13 @@ def average_by_quartile(qt_column, cubes, density):
     Returns:
         iris.cube.CubeList:
     """
-
-    quartiles = qt_column.collapsed(
-        ["grid_longitude", "grid_latitude"], PERCENTILE, percent=[25, 50, 75]
-    )
+    xcoord = qt_column.coord(axis="x", dim_coords=True).name()
+    ycoord = qt_column.coord(axis="y", dim_coords=True).name()
+    quartiles = qt_column.collapsed([xcoord, ycoord], PERCENTILE, percent=[25, 50, 75])
 
     weights_2d = area_weights(qt_column)
-    weights_3d = (grid.volume(density) * density).data
+    if density is not None:
+        weights_3d = (grid.volume(density) * density).data
 
     vars_by_quartile = iris.cube.CubeList()
     for n in range(4):
@@ -194,19 +194,17 @@ def average_by_quartile(qt_column, cubes, density):
                 quartiles.data[n - 1] < qt_column.data,
                 qt_column.data <= quartiles.data[n],
             )
-        mask = broadcast_to_shape(mask, cubes[0].shape, [1, 2])
+
+        if density is not None:
+            mask_3d = broadcast_to_shape(mask, cubes[0].shape, [1, 2])
 
         for m, cube in enumerate(cubes):
             if cube.ndim == 2:
-                by_quartile = cube.collapsed(
-                    ["grid_longitude", "grid_latitude"],
-                    MEAN,
-                    weights=mask[0] * weights_2d,
-                )
+                weights = mask * weights_2d
             else:
-                by_quartile = cube.collapsed(
-                    ["grid_longitude", "grid_latitude"], MEAN, weights=mask * weights_3d
-                )
+                weights = mask_3d * weights_3d
+
+            by_quartile = cube.collapsed([xcoord, ycoord], MEAN, weights=weights)
             by_quartile.add_aux_coord(AuxCoord(points=n + 1, long_name="quartile"))
             vars_by_quartile.append(by_quartile)
 
