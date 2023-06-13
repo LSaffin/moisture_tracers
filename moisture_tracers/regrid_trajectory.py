@@ -36,7 +36,7 @@ from twinotter.util.scripting import parse_docopt_arguments
 from moisture_tracers import grey_zone_forecast
 
 
-def main(
+def _command_line_interface(
     forecast_path,
     forecast_start,
     forecast_resolution,
@@ -63,8 +63,23 @@ def main(
         model_setup=model_setup,
     )
 
-    if to_grid:
-        grid = iris.load_cube(initial_grid)
+    if initial_grid is not None:
+        initial_grid = iris.load_cube(initial_grid)
+
+    for newcubes in from_forecast(forecast, tr, grid=initial_grid, domain_size=domain_size):
+        iris.save(
+            newcubes,
+            "{}/{}_{}_T+{:02d}_lagrangian_grid.nc".format(
+                output_path,
+                forecast.start_time.strftime("%Y%m%dT%H%M"),
+                forecast_resolution,
+                int(forecast.lead_time.total_seconds() // 3600),
+            ),
+        )
+
+
+def from_forecast(forecast, tr, grid=None, domain_size=None):
+    if grid is not None:
         grid_x = grid.coord(axis="x", dim_coords=True)
         grid_y = grid.coord(axis="y", dim_coords=True)
         x0 = grid_x.points.mean()
@@ -74,7 +89,7 @@ def main(
         time = forecast.current_time
         print(time)
 
-        if n == 0 and to_size:
+        if n == 0 and domain_size is not None:
             large_grid = cubes.extract_cube("atmosphere_boundary_layer_thickness")
             x0 = tr[time][0, 0]
             y0 = tr[time][0, 1]
@@ -103,15 +118,7 @@ def main(
                 newcube = cube.regrid(new_grid, regridder)
                 newcubes.append(newcube)
 
-        iris.save(
-            newcubes,
-            "{}/{}_{}_T+{:02d}_lagrangian_grid.nc".format(
-                output_path,
-                forecast.start_time.strftime("%Y%m%dT%H%M"),
-                forecast_resolution,
-                int(forecast.lead_time.total_seconds() // 3600),
-            ),
-        )
+        yield newcubes
 
 
 def translate_grid(x, y, offset_x, offset_y):
@@ -150,4 +157,4 @@ def create_grid(large_grid, x_centre, y_centre, resolution):
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
-    parse_docopt_arguments(main, __doc__)
+    parse_docopt_arguments(_command_line_interface, __doc__)
